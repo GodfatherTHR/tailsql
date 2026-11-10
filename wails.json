@@ -1,0 +1,19 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "tailsql",
+  "outputfilename": "TailSQL",
+  "frontend:install": "npm install --include=dev",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "TailSQL",
+    "email": "dev@tailsql.local"
+  },
+  "info": {
+    "productName": "TailSQL",
+    "productVersion": "0.2.1",
+    "copyright": "TailSQL contributors",
+    "comments": "Local-first H2 database manager with Tailscale hosting"
+  }
+}

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TailSQL | Local-first H2 database manager</title>
+  <meta name="description" content="TailSQL is a local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, and Java connection code.">
+  <meta name="theme-color" content="#060a0e">
+  <meta property="og:title" content="TailSQL | Local-first H2 database manager">
+  <meta property="og:description" content="Create H2 databases, edit rows, run SQL, share over Tailscale, and publish with Funnel when you choose.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://godfatherthr.github.io/tailsql/">
+  <meta property="og:image" content="https://godfatherthr.github.io/tailsql/assets/appicon.png">
+  <link rel="icon" href="./assets/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/appicon.png">
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="./assets/site.css">
+  <script src="./assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="announcement">
+    <strong>TailSQL 0.2.1 is out.</strong>
+    Table editing, public Funnel hosting, and automatic H2 orphan recovery.
+    <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">See the release</a>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./index.html" aria-label="TailSQL home">
+        <img src="./assets/logo.svg" alt="" width="36" height="36">
+        <span class="brand-text">
+          <strong>TailSQL</strong>
+          <span>H2 over Tailscale</span>
+        </span>
+      </a>
+      <nav class="site-nav" id="site-nav" data-nav aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#preview">Product</a>
+        <a href="./docs.html">Docs</a>
+        <a class="nav-download" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Download</a>
+        <a class="nav-github" href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow"><span class="pulse"></span> Local-first database console</span>
+            <h1>Your H2 database, local-first and <span class="gradient">tailnet-ready.</span></h1>
+            <p class="hero-lede">
+              TailSQL gives you a fast desktop console for H2. Create databases, edit rows,
+              run SQL, share over Tailscale, and publish with Funnel when you choose.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="https://github.com/GodfatherTHR/tailsql/releases/latest/download/TailSQL-Setup-0.2.1.exe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+                Download for Windows
+              </a>
+              <a class="btn btn-secondary" href="./docs.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3V4z"/><path d="M8 4v13a3 3 0 003 3"/><path d="M11 9h5M11 13h5"/></svg>
+                Read the docs
+              </a>
+            </div>
+            <div class="hero-meta">
+              <span>Windows 10 and 11</span>
+              <span>Java 11 or newer</span>
+              <span>Tailscale optional</span>
+              <span>Data stays local</span>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-glow"></div>
+            <div class="app-window" aria-hidden="true">
+              <div class="window-bar">
+                <span class="window-dot red"></span>
+                <span class="window-dot amber"></span>
+                <span class="window-dot green"></span>
+                <span class="window-title">TailSQL</span>
+                <span class="window-chip">Local-first</span>
+              </div>
+              <div class="app-shell">
+                <aside class="app-side">
+                  <div class="app-brand">
+                    <img src="./assets/logo.svg" alt="" width="22" height="22">
+                    <div>
+                      <strong>TailSQL</strong>
+                      <small>H2 over Tailscale</small>
+                    </div>
+                  </div>
+                  <div class="app-new">+ New database</div>
+                  <div class="side-label">Databases <span>1</span></div>
+                  <div class="db-item">
+                    <span class="status-dot"></span>
+                    <div>
+                      <strong>inventory_db</strong>
+                      <small>:9093 / Running</small>
+                    </div>
+                  </div>
+                  <div class="side-foot">
+                    <span class="status-dot"></span> Tailscale connected
+                    <small>desktop.tailnet.ts.net</small>
+                  </div>
+                </aside>
+                <section class="app-main">
+                  <div class="app-top">
+                    <div class="app-db">
+                      <span class="db-mark">H2</span>
+                      <div>
+                        <strong>inventory_db</strong>
+                        <small>inventory_db.mv.db / 336 KB</small>
+                      </div>
+                      <span class="badge green">Running</span>
+                    </div>
+                    <div class="app-tabs">
+                      <span>Overview</span>
+                      <span class="active">Table</span>
+                      <span>SQL</span>
+                    </div>
+                  </div>
+                  <div class="app-content">
+                    <div class="app-head">
+                      <div>
+                        <small>Table editor</small>
+                        <h3>inventory.products</h3>
+                      </div>
+                      <div class="app-actions">
+                        <span class="fake-btn">Refresh</span>
+                        <span class="fake-btn primary">Add row</span>
+                      </div>
+                    </div>
+                    <div class="app-grid">
+                      <div class="schema-panel">
+                        <div class="panel-title">Schema <span>15</span></div>
+                        <div class="schema-group">INVENTORY</div>
+                        <div class="schema-item active">products <span>10</span></div>
+                        <div class="schema-item">categories <span>3</span></div>
+                        <div class="schema-item">suppliers <span>6</span></div>
+                        <div class="schema-item">stock_levels <span>6</span></div>
+                        <div class="schema-group">PUBLIC</div>
+                        <div class="schema-item">users <span>5</span></div>
+                        <div class="schema-group">TODO</div>
+                        <div class="schema-item">tasks <span>9</span></div>
+                      </div>
+                      <div class="data-panel">
+                        <div class="data-meta">
+                          <span>Rows 1 to 4</span>
+                          <span>Sorted by ID</span>
+                          <span class="badge">4 rows</span>
+                        </div>
+                        <table class="app-table">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>NAME</th>
+                              <th>PRICE</th>
+                              <th>STOCK</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr><td>1</td><td>Wireless Mouse</td><td class="num">29.00</td><td class="num">42</td></tr>
+                            <tr><td>2</td><td>USB-C Hub</td><td class="num">49.00</td><td class="num">18</td></tr>
+                            <tr><td>3</td><td>Desk Lamp</td><td class="num">35.00</td><td class="num">7</td></tr>
+                            <tr><td>4</td><td>Notebook</td><td class="num">8.50</td><td class="num">120</td></tr>
+                          </tbody>
+                        </table>
+                        <div class="data-footer">
+                          <span>Showing 4 of 4 rows</span>
+                          <span>Previous / Next</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-facts reveal">
+          <div class="fact"><strong>Local by default</strong><span>H2 binds to 127.0.0.1 only</span></div>
+          <div class="fact"><strong>H2 2.3.232</strong><span>Pinned engine included</span></div>
+          <div class="fact"><strong>Tailscale ready</strong><span>Tailnet and Funnel hosting</span></div>
+          <div class="fact"><strong>Java support</strong><span>HikariCP, JDBC, Spring Boot</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-kicker">Everything in one console</span>
+          <h2>A database manager that respects the local machine.</h2>
+          <p class="section-lede">
+            TailSQL keeps the engine on loopback, adds sharing only when you ask for it,
+            and gives you the everyday tools to work with H2 without a separate admin stack.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg>
+            </div>
+            <h3>Table editor</h3>
+            <p>Click a table and edit rows like a spreadsheet. Insert, update, and delete with primary-key safety, pagination, sorting, and NULL controls.</p>
+            <div class="mini"><span>CRUD</span><span>Primary keys</span><span>Pagination</span></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M12 15h5"/></svg>
+            </div>
+            <h3>SQL workbench</h3>
+            <p>Run one statement at a time, inspect columns, and jump from the schema tree to a generated SELECT. Results are capped at 500 rows.</p>
+            <div class="mini"><span>Ctrl+Enter</span><span>Schema tree</span><span>500 rows</span></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.1 11.1l7.8-4M8.1 12.9l7.8 4"/></svg>
+            </div>
+            <h3>Tailscale hosting</h3>
+            <p>Share a database with your tailnet through a loopback-to-tailnet proxy. Watch active peers and throughput live.</p>
+            <div class="mini"><span>MagicDNS</span><span>ACLs</span><span>Live metrics</span></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg>
+            </div>
+            <h3>Public Funnel</h3>
+            <p>Expose a database on the internet with Tailscale Funnel on ports 443, 8443, or 10000. Clear warnings and automatic cleanup keep exposure deliberate.</p>
+            <div class="mini"><span>Port 10000</span><span>Auto cleanup</span><span>Public URL</span></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>
+            </div>
+            <h3>Java connectivity</h3>
+            <p>Generate Maven, Gradle, HikariCP, Spring Boot, and raw JDBC snippets with the active credentials and endpoint.</p>
+            <div class="mini"><span>HikariCP</span><span>JDBC</span><span>Spring Boot</span></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-2.9 8.2-7 10-4.1-1.8-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h3>Crash recovery</h3>
+            <p>Validate persisted PIDs, adopt healthy H2 servers, and find untracked processes that still hold a database file before starting again.</p>
+            <div class="mini"><span>Adoption</span><span>Orphan cleanup</span><span>Process trees</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="preview">
+      <div class="container">
+        <div class="split">
+          <div class="split-copy reveal">
+            <span class="section-kicker">Table editor</span>
+            <h2>Edit data without writing SQL.</h2>
+            <p>
+              The table editor keeps everyday changes in one place. The schema tree stays on the
+              left, the grid stays on the right, and every write goes through a validated SQL statement.
+            </p>
+            <ul class="check-list">
+              <li><span><strong>Primary-key aware edits.</strong> Update and delete identify a single row.</span></li>
+              <li><span><strong>Pagination and sorting.</strong> Choose 25, 50, or 100 rows per page.</span></li>
+              <li><span><strong>NULL and default controls.</strong> Omit a value to let H2 supply the default.</span></li>
+              <li><span><strong>Safe column handling.</strong> Identity, generated, and view columns are treated correctly.</span></li>
+              <li><span><strong>No silent truncation.</strong> Values above the display cap are never saved back by accident.</span></li>
+            </ul>
+          </div>
+          <div class="split-visual reveal">
+            <div class="row-editor" aria-hidden="true">
+              <div class="editor-head">
+                <div>
+                  <strong>Edit row</strong>
+                  <small>inventory.products</small>
+                </div>
+                <span class="badge green">Primary key: ID</span>
+              </div>
+              <div class="editor-body">
+                <div class="field"><label>NAME</label><div class="control active">Wireless Mouse</div></div>
+                <div class="field"><label>CATEGORY</label><div class="control active">Electronics</div></div>
+                <div class="field"><label>PRICE</label><div class="control active">29.00</div></div>
+                <div class="field"><label>STOCK</label><div class="control active">42</div></div>
+                <div class="field"><label>NOTES</label><div class="control"><span>No value</span><span class="null">NULL</span></div></div>
+                <div class="field"><label>UPDATED_AT</label><div class="control">Generated by H2</div></div>
+              </div>
+              <div class="editor-actions">
+                <span class="fake-btn">Cancel</span>
+                <span class="fake-btn primary">Save changes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sharing">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-kicker">Sharing</span>
+          <h2>From loopback to tailnet to the public internet.</h2>
+          <p class="section-lede">
+            H2 always binds to 127.0.0.1. TailSQL adds sharing only when you turn it on,
+            and each step is a separate choice.
+          </p>
+        </div>
+        <div class="flow reveal">
+          <div class="flow-card">
+            <span class="flow-label">Local</span>
+            <strong>127.0.0.1:9093</strong>
+            <p>The H2 engine stays on loopback. Local work needs no network setup.</p>
+            <span class="flow-arrow">&rarr;</span>
+          </div>
+          <div class="flow-card">
+            <span class="flow-label">Tailnet</span>
+            <strong>100.x.y.z:19093</strong>
+            <p>A proxy on the Tailscale interface for peers allowed by your ACLs.</p>
+            <span class="flow-arrow">&rarr;</span>
+          </div>
+          <div class="flow-card public">
+            <span class="flow-label">Public internet</span>
+            <strong>node.tailnet.ts.net:10000</strong>
+            <p>Tailscale Funnel exposes the raw H2 TCP port to anyone on the internet.</p>
+          </div>
+        </div>
+        <div class="callout danger reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
+          <span><strong>Funnel is public.</strong> Raw Funnel TCP is not encrypted in transit, and the H2 password is the only access control. Use a strong password, share only what you intend to share, and disable Funnel when you are done.</span>
+        </div>
+        <ul class="check-list">
+          <li><span><strong>Allowed ports only.</strong> Funnel uses 443, 8443, or 10000. Port 10000 is the default.</span></li>
+          <li><span><strong>Cleanup on normal actions.</strong> Hosting is removed when the database stops, restarts, is deleted, or the app exits cleanly.</span></li>
+          <li><span><strong>Crash reconciliation.</strong> A leftover Funnel mapping is checked on the next launch.</span></li>
+          <li><span><strong>Independent choices.</strong> Tailnet hosting and public Funnel can be enabled separately.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="java">
+      <div class="container">
+        <div class="split reverse">
+          <div class="split-visual reveal">
+            <div class="code-card" aria-hidden="true">
+              <div class="code-card-head"><span>DatabaseConfig.java</span><span>HikariCP</span></div>
+              <pre><code><span class="comment">// Generated with the active endpoint and credentials</span>
+HikariConfig config = new HikariConfig();
+config.setJdbcUrl(<span class="str">"jdbc:h2:tcp://127.0.0.1:9093/./inventory_db"</span>);
+config.setUsername(<span class="str">"sa"</span>);
+config.setPassword(<span class="str">"your-generated-password"</span>);
+config.setMaximumPoolSize(<span class="str">5</span>);
+config.setConnectionTimeout(<span class="str">10_000</span>);
+return <span class="key">new</span> HikariDataSource(config);</code></pre>
+            </div>
+          </div>
+          <div class="split-copy reveal">
+            <span class="section-kicker">Java connectivity</span>
+            <h2>Connect from Java in minutes.</h2>
+            <p>
+              TailSQL generates copy-ready connection code for local and tailnet modes,
+              using the credentials stored on this machine. Switch modes and the snippets update.
+            </p>
+            <div class="mini" style="margin-top: 22px;">
+              <span>HikariCP</span>
+              <span>JDBC test</span>
+              <span>Maven</span>
+              <span>Gradle</span>
+              <span>Spring properties</span>
+              <span>Spring YAML</span>
+            </div>
+            <ul class="check-list">
+              <li><span><strong>Two connection modes.</strong> Loopback for local tools and Tailscale for allowed peers.</span></li>
+              <li><span><strong>No copy mistakes.</strong> Ports, database names, users, and passwords are filled in for you.</span></li>
+              <li><span><strong>Verified output.</strong> The generated HikariCP and raw JDBC programs are compiled and tested against H2.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="start">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-kicker">Quick start</span>
+          <h2>From download to first query in three steps.</h2>
+        </div>
+        <div class="steps">
+          <article class="step reveal">
+            <h3>Install TailSQL</h3>
+            <p>Download the Windows setup, run it, and launch TailSQL. Java 11 or newer is required, and the H2 engine is included.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Create a database</h3>
+            <p>Pick a name and a password. TailSQL starts a loopback H2 server on the next free port and stores the database under <code>~/.tailsql</code>.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Edit, query, share</h3>
+            <p>Open the Table Editor, run SQL, or enable Tailscale hosting when you need remote access. The docs cover every screen.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="download">
+      <div class="container">
+        <div class="download-band reveal">
+          <h2>Get TailSQL 0.2.1 for Windows.</h2>
+          <p>The installer includes the H2 engine. Tailscale is optional, and your databases stay on your machine.</p>
+          <div class="download-actions">
+            <a class="btn btn-primary" href="https://github.com/GodfatherTHR/tailsql/releases/latest/download/TailSQL-Setup-0.2.1.exe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+              Download setup.exe
+            </a>
+            <a class="btn btn-secondary" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Release notes</a>
+          </div>
+          <div class="download-meta">
+            <span>Windows 10 and 11 x64</span>
+            <span>Java 11 or newer</span>
+            <span>Tailscale optional</span>
+            <span>Data stays in ~/.tailsql</span>
+          </div>
+          <div class="callout note" style="margin-top: 24px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>The installer is unsigned, so Windows SmartScreen may ask you to confirm before running it. The source code is public on GitHub.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="./index.html">
+            <img src="./assets/logo.svg" alt="" width="34" height="34">
+            <span class="brand-text"><strong>TailSQL</strong><span>H2 over Tailscale</span></span>
+          </a>
+          <p>A local-first H2 database manager for Windows. Create, edit, query, and share without giving up control of the engine.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Product</h3>
+          <a href="#features">Features</a>
+          <a href="#preview">Table editor</a>
+          <a href="#sharing">Sharing</a>
+          <a href="#download">Download</a>
+        </div>
+        <div class="footer-col">
+          <h3>Resources</h3>
+          <a href="./docs.html">Documentation</a>
+          <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">Releases</a>
+          <a href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
+          <a href="https://github.com/GodfatherTHR/tailsql/issues">Issues</a>
+        </div>
+        <div class="footer-col">
+          <h3>Stack</h3>
+          <a href="https://wails.io/">Wails</a>
+          <a href="https://h2database.com/">H2 Database</a>
+          <a href="https://tailscale.com/">Tailscale</a>
+          <a href="https://react.dev/">React</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; <span data-year>2026</span> TailSQL contributors.</span>
+        <span class="legal">Tailscale is a trademark of Tailscale Inc. TailSQL is an independent project and is not affiliated with Tailscale Inc.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

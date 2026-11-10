@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TailSQL documentation | Install, edit data, share, troubleshoot</title>
+  <meta name="description" content="TailSQL documentation: install on Windows, create an H2 database, use the table editor and SQL workbench, connect from Java, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
+  <meta name="theme-color" content="#060a0e">
+  <meta property="og:title" content="TailSQL documentation">
+  <meta property="og:description" content="Install TailSQL, create an H2 database, edit rows, run SQL, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://godfatherthr.github.io/tailsql/docs.html">
+  <meta property="og:image" content="https://godfatherthr.github.io/tailsql/assets/appicon.png">
+  <link rel="icon" href="./assets/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/appicon.png">
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="./assets/site.css">
+  <script src="./assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./index.html" aria-label="TailSQL home">
+        <img src="./assets/logo.svg" alt="" width="36" height="36">
+        <span class="brand-text">
+          <strong>TailSQL</strong>
+          <span>Documentation</span>
+        </span>
+      </a>
+      <nav class="site-nav" id="site-nav" data-nav aria-label="Main navigation">
+        <a href="./index.html#features">Features</a>
+        <a href="./index.html#preview">Product</a>
+        <a href="./docs.html">Docs</a>
+        <a class="nav-download" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Download</a>
+        <a class="nav-github" href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="docs-hero">
+      <div class="container">
+        <span class="eyebrow"><span class="pulse"></span> TailSQL 0.2.1</span>
+        <h1>Documentation</h1>
+        <p>Everything you need to install TailSQL, create an H2 database, edit rows, run SQL, connect from Java, and share safely with Tailscale or Funnel.</p>
+      </div>
+    </section>
+
+    <div class="container docs-layout">
+      <aside class="docs-sidebar" aria-label="Documentation contents">
+        <div class="docs-nav-group">
+          <h2>Start here</h2>
+          <a href="#requirements">Requirements</a>
+          <a href="#install">Install</a>
+          <a href="#first-database">First database</a>
+        </div>
+        <div class="docs-nav-group">
+          <h2>Work with data</h2>
+          <a href="#table-editor">Table editor</a>
+          <a href="#sql-workbench">SQL workbench</a>
+          <a href="#java">Java connectivity</a>
+        </div>
+        <div class="docs-nav-group">
+          <h2>Share</h2>
+          <a href="#tailscale">Tailscale hosting</a>
+          <a href="#funnel">Public Funnel</a>
+        </div>
+        <div class="docs-nav-group">
+          <h2>Reference</h2>
+          <a href="#data-locations">Data locations</a>
+          <a href="#security">Security</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+          <a href="#shortcuts">Keyboard shortcuts</a>
+          <a href="#build">Build from source</a>
+          <a href="#faq">FAQ</a>
+          <a href="#changelog">Changelog</a>
+        </div>
+      </aside>
+
+      <div class="docs-content">
+        <article class="doc-section" id="requirements">
+          <h2>Requirements</h2>
+          <p>TailSQL runs as a Windows desktop app. The local database features do not need Tailscale.</p>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Component</th><th>Requirement</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Windows</td><td>Windows 10 or 11, 64-bit</td><td>The published installer targets Windows x64.</td></tr>
+                <tr><td>Java</td><td>Java 11 or newer</td><td>Java 17, 21, or 24 are recommended. Java is used for the H2 engine and the JDBC bridge.</td></tr>
+                <tr><td>WebView2</td><td>Microsoft Edge WebView2 runtime</td><td>Included with current Windows 10 and 11 installations.</td></tr>
+                <tr><td>Tailscale</td><td>Optional</td><td>Required only for tailnet hosting or public Funnel hosting.</td></tr>
+                <tr><td>H2 engine</td><td>Included</td><td>The installer includes the pinned H2 2.3.232 jar.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-callout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span><strong>Java is required.</strong> If TailSQL cannot find Java, install a JDK or JRE 11 or newer and make sure <code>java</code> is on PATH or <code>JAVA_HOME</code> is set.</span>
+          </div>
+        </article>
+
+        <article class="doc-section" id="install">
+          <h2>Install TailSQL</h2>
+          <ol class="numbered">
+            <li>Download <code>TailSQL-Setup-0.2.1.exe</code> from the <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">latest GitHub release</a>.</li>
+            <li>Run the installer. If Windows SmartScreen appears, choose <strong>More info</strong>, then <strong>Run anyway</strong>. The installer is currently unsigned.</li>
+            <li>Choose an install folder and finish the wizard. The default is <code>%ProgramFiles%\TailSQL</code>.</li>
+            <li>Launch TailSQL from the Start Menu or the desktop shortcut.</li>
+          </ol>
+          <p>The installer places <code>TailSQL.exe</code> and the required <code>assets\h2.jar</code> in the install folder. Your database data is stored separately in your user profile.</p>
+          <h3>Uninstall</h3>
+          <p>Use <strong>Settings &gt; Apps &gt; Installed apps</strong> or the <strong>Uninstall TailSQL</strong> shortcut in the Start Menu. Uninstalling removes the application files. It does not delete the databases in <code>~/.tailsql</code>.</p>
+        </article>
+
+        <article class="doc-section" id="first-database">
+          <h2>Create your first database</h2>
+          <ol class="numbered">
+            <li>Select <strong>New database</strong> in the left sidebar.</li>
+            <li>Enter a database name. Lowercase letters, digits, and underscores work best, for example <code>inventory_db</code>.</li>
+            <li>Keep the default username <code>sa</code> or enter another user name.</li>
+            <li>Use the generated password or enter your own. The password must be at least 8 characters.</li>
+            <li>Leave the port empty to choose the next free port automatically, or enter a port between 1024 and 65535.</li>
+            <li>Select <strong>Create and start</strong>.</li>
+          </ol>
+          <p>TailSQL creates the database, starts the H2 TCP server on <code>127.0.0.1</code>, and stores the database file in <code>~/.tailsql/dbs</code>.</p>
+          <div class="doc-callout warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            <span><strong>Credentials are local.</strong> The database user name, password, and H2 shutdown secret are stored in <code>~/.tailsql/instances.json</code>. Protect that file like any other credential store.</span>
+          </div>
+        </article>
+
+        <article class="doc-section" id="table-editor">
+          <h2>Table editor</h2>
+          <p>Use the Table Editor to browse and change rows without writing SQL. You can also click any table in the SQL Workbench schema tree to open the same editor.</p>
+          <h3>Browse rows</h3>
+          <ul class="bullets">
+            <li>Select a table in the schema tree. The grid loads the first page of rows.</li>
+            <li>Choose 25, 50, or 100 rows per page.</li>
+            <li>Select a column header to sort. Select it again to reverse the sort, then once more to clear it.</li>
+            <li>Use <strong>Previous</strong> and <strong>Next</strong> to move through pages. The <strong>more</strong> badge means another page is available.</li>
+            <li>Select <strong>Refresh</strong> to reload both the schema and the current page.</li>
+          </ul>
+          <h3>Insert a row</h3>
+          <ol class="numbered">
+            <li>Select <strong>Add row</strong>.</li>
+            <li>Each column has a <strong>Set</strong> or <strong>Omit</strong> control. Omit a column to use the H2 default or NULL.</li>
+            <li>Use the <strong>NULL</strong> control to write an explicit SQL NULL. Leave it off to send the value you typed.</li>
+            <li>Identity and generated columns are handled automatically.</li>
+            <li>Select <strong>Insert row</strong>.</li>
+          </ol>
+          <h3>Edit a row</h3>
+          <ol class="numbered">
+            <li>Select the pencil button on a row, or double-click the row.</li>
+            <li>Change the fields you need. The primary key is read only.</li>
+            <li>Only changed fields are sent to the database.</li>
+            <li>Select <strong>Save changes</strong>.</li>
+          </ol>
+          <h3>Delete a row</h3>
+          <p>Select the trash button, review the primary key shown in the confirmation, and select <strong>Delete row</strong>.</p>
+          <div class="doc-callout warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            <span><strong>Tables need a primary key for edits and deletes.</strong> H2 does not provide a universal row identifier. Tables without a primary key can still accept inserts, and views are read only in the editor.</span>
+          </div>
+          <p>Values longer than the display cap are marked <strong>truncated</strong>. TailSQL does not save those values back by accident. Use the SQL Workbench when you need to edit a very large text value.</p>
+        </article>
+
+        <article class="doc-section" id="sql-workbench">
+          <h2>SQL workbench</h2>
+          <p>The SQL Workbench runs one statement at a time against the selected database. It is useful for DDL, joins, and queries that the table editor does not cover.</p>
+          <ul class="bullets">
+            <li>Enter a statement and select <strong>Run query</strong>, or press <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</li>
+            <li>Results are capped at 500 rows.</li>
+            <li>Use the schema tree to inspect columns. The terminal button inserts a generated <code>SELECT</code> into the editor.</li>
+            <li>Selecting the table name in the schema tree opens the Table Editor instead.</li>
+            <li>DDL statements such as <code>CREATE</code>, <code>ALTER</code>, and <code>DROP</code> refresh the schema automatically.</li>
+          </ul>
+          <div class="code-block">
+            <div class="code-block-head"><span>SQL example</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>SELECT id, name, price, stock
+FROM inventory.products
+WHERE stock &lt; 10
+ORDER BY stock ASC;</code></pre>
+          </div>
+        </article>
+
+        <article class="doc-section" id="java">
+          <h2>Java connectivity</h2>
+          <p>Open <strong>Connect to Java</strong> to see copy-ready connection code for the selected database.</p>
+          <h3>Connection modes</h3>
+          <ul class="bullets">
+            <li><strong>Local machine</strong> uses <code>127.0.0.1</code> and the local H2 port.</li>
+            <li><strong>Tailscale tailnet</strong> uses the proxy address on your tailnet. Tailscale hosting must be enabled first.</li>
+          </ul>
+          <p>The generated tabs include HikariCP, a raw JDBC test, Maven, Gradle, Spring Boot properties, and Spring Boot YAML. Credentials, ports, and the database name are filled in from the selected instance.</p>
+          <div class="code-block">
+            <div class="code-block-head"><span>Local JDBC URL</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>jdbc:h2:tcp://127.0.0.1:9093/./inventory_db</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-head"><span>Tailnet JDBC URL</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>jdbc:h2:tcp://100.76.208.54:19093/./inventory_db</code></pre>
+          </div>
+          <p>For a public Funnel endpoint, use the public host and port shown in the Funnel card, for example <code>jdbc:h2:tcp://node.tailnet.ts.net:10000/./inventory_db</code>.</p>
+        </article>
+
+        <article class="doc-section" id="tailscale">
+          <h2>Tailscale hosting</h2>
+          <p>Tailscale hosting shares the database with other devices on your tailnet. The H2 engine stays on loopback, and TailSQL starts a proxy on the detected Tailscale IPv4 address.</p>
+          <ol class="numbered">
+            <li>Make sure Tailscale is installed, running, and signed in.</li>
+            <li>Start the database.</li>
+            <li>Open <strong>Overview</strong> and find the <strong>Tailscale hosting</strong> card.</li>
+            <li>Turn on the switch. TailSQL chooses the next free proxy port and shows the generated JDBC endpoint.</li>
+            <li>Share the endpoint with a device allowed by your Tailscale ACLs.</li>
+          </ol>
+          <p>The card shows the active clients, total connections, bytes sent to H2, and bytes sent to peers.</p>
+          <div class="doc-callout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span><strong>Tailscale ACLs are the network boundary.</strong> H2 still authenticates with its own user name and password. Tailscale hosting is not restored automatically after a restart; turn it on again when needed.</span>
+          </div>
+        </article>
+
+        <article class="doc-section" id="funnel">
+          <h2>Public Funnel</h2>
+          <p>Tailscale Funnel publishes the database on the public internet. This is a separate choice from tailnet hosting.</p>
+          <ol class="numbered">
+            <li>Start the database and make sure Tailscale is connected.</li>
+            <li>Open <strong>Overview</strong> and find the <strong>Public internet (Funnel)</strong> card.</li>
+            <li>Choose a public port. Funnel only supports 443, 8443, and 10000. Port 10000 is the default because 443 and 8443 are often used by HTTPS services.</li>
+            <li>Select <strong>Publish database</strong> and copy the public JDBC endpoint.</li>
+          </ol>
+          <p>The card shows the public host, Funnel port, and the JDBC URL. TailSQL removes the mapping when the database stops, restarts, is deleted, or the app exits cleanly. A mapping left behind by a crash is checked on the next launch.</p>
+          <div class="doc-callout danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            <span><strong>Funnel is public and raw TCP is not encrypted in transit.</strong> Anyone on the internet can reach the H2 port. The database password is the only access control. Use a strong password, share only what you intend to share, and disable Funnel when you are done.</span>
+          </div>
+          <p>If Funnel is not enabled for your tailnet, Tailscale returns an error in the card. Follow the Tailscale message to enable Funnel for the node, then try again.</p>
+        </article>
+
+        <article class="doc-section" id="data-locations">
+          <h2>Data locations and backups</h2>
+          <p>TailSQL stores everything under <code>%USERPROFILE%\.tailsql</code> on Windows.</p>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Path</th><th>Purpose</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>instances.json</code></td><td>Instance metadata and settings</td><td>Contains credentials. Keep it private.</td></tr>
+                <tr><td><code>dbs\&lt;name&gt;.mv.db</code></td><td>H2 database file</td><td>Deleting an instance in the app keeps this file.</td></tr>
+                <tr><td><code>logs\&lt;id&gt;.log</code></td><td>H2 server output</td><td>Useful when a start fails.</td></tr>
+                <tr><td><code>bridge\</code></td><td>Embedded JDBC bridge classes</td><td>Recreated automatically.</td></tr>
+                <tr><td><code>assets\h2.jar</code></td><td>Downloaded H2 engine</td><td>Optional when the jar is installed with the app.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Back up a database</h3>
+          <ol class="numbered">
+            <li>Stop the database in TailSQL.</li>
+            <li>Copy the matching <code>.mv.db</code> file from <code>~/.tailsql/dbs</code>.</li>
+            <li>Store the copy somewhere safe.</li>
+          </ol>
+          <p>Restoring a file is the reverse: stop TailSQL, put the <code>.mv.db</code> file back in <code>~/.tailsql/dbs</code>, then start the database.</p>
+        </article>
+
+        <article class="doc-section" id="security">
+          <h2>Security notes</h2>
+          <ul class="bullets">
+            <li><strong>Local by default.</strong> H2 binds to <code>127.0.0.1</code>. TailSQL never binds the engine to a wildcard address.</li>
+            <li><strong>Tailnet sharing.</strong> The proxy binds to the Tailscale address. Your Tailscale ACLs decide which peers can reach it.</li>
+            <li><strong>Public Funnel.</strong> Funnel exposes raw TCP to the internet. It is not encrypted in transit. Use a strong H2 password and disable Funnel when you are done.</li>
+            <li><strong>Credentials.</strong> The database password and the H2 shutdown secret are stored in <code>instances.json</code>. Credentials are immutable in this release; recreate the database to rotate them.</li>
+            <li><strong>Uninstall.</strong> Uninstalling removes the app, not your databases. Delete <code>~/.tailsql</code> manually if you want to remove all local data.</li>
+          </ul>
+        </article>
+
+        <article class="doc-section" id="troubleshooting">
+          <h2>Troubleshooting</h2>
+
+          <h3>Database may be already in use (SQLState 90020)</h3>
+          <p>This error means another process is holding the <code>.mv.db</code> file. It often happens when a previous TailSQL session or a failed start leaves an H2 server running.</p>
+          <p><strong>TailSQL 0.2.1 handles this automatically.</strong> Before starting a database, it finds H2 servers that match the instance port, database folder, and shutdown password. A healthy server is adopted. A wedged server that still holds the file is stopped, then the database starts normally.</p>
+          <div class="doc-callout warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            <span><strong>On an older build,</strong> close every TailSQL window. Open Task Manager, find <code>java.exe</code> processes whose command line contains <code>org.h2.tools.Server</code> and your <code>~/.tailsql</code> folder, and end only those processes. Do not end unrelated Java applications. Then relaunch TailSQL and start the database again.</span>
+          </div>
+
+          <h3>Java is not installed or is too old</h3>
+          <p>Install Java 11 or newer. TailSQL prefers <code>JAVA_HOME</code>, then <code>java</code> on PATH. You can also set <code>settings.javaPath</code> in <code>~/.tailsql/instances.json</code> to a specific Java executable. Select <strong>Refresh system health</strong> after changing Java.</p>
+
+          <h3>The H2 engine is missing</h3>
+          <p>Use the <strong>Download H2</strong> action in the health banner. The pinned engine is installed into <code>~/.tailsql/assets/h2.jar</code>. The Windows installer also includes a copy next to the app.</p>
+
+          <h3>Tailscale is not connected</h3>
+          <p>Open Tailscale, sign in, and select <strong>Refresh</strong> in the Tailscale card or the sidebar. Local databases continue to work without Tailscale.</p>
+
+          <h3>Funnel port is already in use</h3>
+          <p>Funnel only allows ports 443, 8443, and 10000. A port may already be used by another Tailscale Serve or Funnel service. Choose a different allowed port. Port 10000 is the safest default.</p>
+
+          <h3>Funnel is not enabled for the tailnet</h3>
+          <p>Tailscale controls Funnel access with tailnet policy. Read the error shown in the Funnel card, enable Funnel for the node in the Tailscale admin console, then retry.</p>
+
+          <h3>I cannot edit or delete a row</h3>
+          <p>The table likely has no primary key, or the selected object is a view. Tables without a primary key accept inserts but not updates or deletes. Use a table with a primary key for full editing.</p>
+
+          <h3>A database port is already in use</h3>
+          <p>Create the database with an empty port field so TailSQL chooses a free port, or select another port between 1024 and 65535.</p>
+
+          <h3>The app does not open</h3>
+          <p>Install the Microsoft Edge WebView2 runtime if it is missing. On Windows 10 and 11 it is usually already present. Also check that <code>~/.tailsql</code> is writable by your user.</p>
+
+          <h3>Where are the logs?</h3>
+          <p>Open the Overview screen and use the server log panel, or read <code>~/.tailsql/logs/&lt;instance-id&gt;.log</code>.</p>
+        </article>
+
+        <article class="doc-section" id="shortcuts">
+          <h2>Keyboard shortcuts</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Shortcut</th><th>Where</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td><td>SQL Workbench</td><td>Run the current statement</td></tr>
+                <tr><td><kbd>Esc</kbd></td><td>Dialogs</td><td>Close the dialog when it is not busy</td></tr>
+                <tr><td><kbd>Tab</kbd></td><td>App</td><td>Move focus through controls</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="doc-section" id="build">
+          <h2>Build from source</h2>
+          <p>TailSQL is a Wails app with a Go backend and a React frontend. The source is public at <a href="https://github.com/GodfatherTHR/tailsql">github.com/GodfatherTHR/tailsql</a>.</p>
+          <h3>Build requirements</h3>
+          <ul class="bullets">
+            <li>Go 1.22 or newer.</li>
+            <li>Node.js 18 or newer.</li>
+            <li>Wails CLI 2.17.1.</li>
+            <li>Java 11 or newer at runtime.</li>
+            <li>A JDK 11 or newer only if you rebuild the embedded JDBC bridge.</li>
+            <li>Tailscale only for testing remote hosting.</li>
+          </ul>
+          <div class="code-block">
+            <div class="code-block-head"><span>PowerShell</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>scripts/fetch-h2.ps1
+scripts/build-bridge.ps1
+cd frontend
+npm install --include=dev
+npm run build
+cd ..
+wails build</code></pre>
+          </div>
+          <h3>Run the checks</h3>
+          <div class="code-block">
+            <div class="code-block-head"><span>PowerShell</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>go test ./...
+go vet ./...
+cd frontend
+npm run build</code></pre>
+          </div>
+          <h3>Run the real-H2 integration tests</h3>
+          <div class="code-block">
+            <div class="code-block-head"><span>PowerShell</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>$env:TAILSQL_INTEGRATION = "1"
+go test ./internal/dbmanager -v
+go test ./internal/sqlrunner -run TestTableDataIntegration -v</code></pre>
+          </div>
+          <h3>Build the installer</h3>
+          <p>The installer script uses NSIS. Pass the path to <code>makensis</code> if it is not on PATH.</p>
+          <div class="code-block">
+            <div class="code-block-head"><span>PowerShell</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
+            <pre><code>scripts/build.ps1
+scripts/build-installer.ps1
+# Or:
+scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"</code></pre>
+          </div>
+        </article>
+
+        <article class="doc-section" id="faq">
+          <h2>FAQ</h2>
+          <div class="faq-list">
+            <details>
+              <summary>Does TailSQL require Tailscale?</summary>
+              <p>No. All local database features work without Tailscale. Tailscale is needed only for tailnet hosting or public Funnel hosting.</p>
+            </details>
+            <details>
+              <summary>Where are my databases stored?</summary>
+              <p>Under <code>%USERPROFILE%\.tailsql</code>. Database files are in <code>dbs</code>, logs are in <code>logs</code>, and instance metadata is in <code>instances.json</code>.</p>
+            </details>
+            <details>
+              <summary>Can I rotate the database password?</summary>
+              <p>Credentials are immutable in 0.2.1. To rotate them, create a new database and move your data, or use another H2 client to change the database user.</p>
+            </details>
+            <details>
+              <summary>Does Funnel encrypt the connection?</summary>
+              <p>Raw Funnel TCP is not encrypted in transit. The H2 password is the only access control. Prefer tailnet hosting for private work, and disable Funnel when you are done.</p>
+            </details>
+            <details>
+              <summary>Why can I insert but not edit a table?</summary>
+              <p>The table has no primary key. H2 cannot identify a single row without one, so TailSQL disables updates and deletes for keyless tables.</p>
+            </details>
+            <details>
+              <summary>Can I use an existing H2 database file?</summary>
+              <p>TailSQL manages its own instance metadata. To open an existing file, place it in <code>~/.tailsql/dbs</code> with the expected name and create an instance with matching database user credentials, or connect to it with another H2 client.</p>
+            </details>
+            <details>
+              <summary>Does uninstalling delete my data?</summary>
+              <p>No. The uninstaller removes the application files. Delete <code>~/.tailsql</code> manually after making a backup if you want to remove all data.</p>
+            </details>
+            <details>
+              <summary>Does TailSQL run on macOS or Linux?</summary>
+              <p>The source includes cross-platform Go and Wails code and can be built on macOS or Linux. The published installer in this repository targets Windows x64.</p>
+            </details>
+          </div>
+        </article>
+
+        <article class="doc-section" id="changelog">
+          <h2>Changelog</h2>
+          <h3>0.2.1</h3>
+          <ul class="bullets">
+            <li>Find untracked H2 servers by port, database folder, and shutdown password.</li>
+            <li>Adopt healthy H2 servers and stop wedged servers that still hold a database file.</li>
+            <li>Prefer <code>JAVA_HOME</code> over the Windows Java launcher shim.</li>
+            <li>Use process-tree termination so a failed start cannot leave a JVM child behind.</li>
+            <li>Add Windows setup installer, product website, and documentation.</li>
+          </ul>
+          <h3>0.2.0</h3>
+          <ul class="bullets">
+            <li>Add the table editor with insert, edit, delete, pagination, sorting, and primary-key safety.</li>
+            <li>Add public internet hosting with Tailscale Funnel on ports 443, 8443, and 10000.</li>
+            <li>Add automatic Funnel cleanup and a public status badge.</li>
+          </ul>
+          <h3>0.1.0</h3>
+          <ul class="bullets">
+            <li>Local H2 lifecycle management with graceful shutdown and crash recovery.</li>
+            <li>Tailscale tailnet proxy with live client metrics.</li>
+            <li>SQL Workbench with schema inspection and a 500-row result cap.</li>
+            <li>Java connectivity code generation for HikariCP, JDBC, Maven, Gradle, and Spring Boot.</li>
+          </ul>
+        </article>
+
+        <div class="docs-pager">
+          <a href="./index.html">&larr; Back to the product site</a>
+          <a href="#requirements">Back to top &uarr;</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>&copy; <span data-year>2026</span> TailSQL contributors.</span>
+        <span class="legal">Tailscale is a trademark of Tailscale Inc. TailSQL is an independent project and is not affiliated with Tailscale Inc.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

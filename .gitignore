@@ -1,0 +1,39 @@
+# Build output
+/build/bin/
+/frontend/dist/
+/frontend/node_modules/
+
+# Installer output
+/dist/
+
+# Internal engineering notes (kept local, not part of the public site)
+/docs/development/
+
+# Unrelated local projects
+/inventory-management/
+/todo-app/
+/.commandcode/
+
+# Go
+*.exe
+*.test
+*.out
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Wails dev cache
+/frontend/package.json.md5
+
+# Local state snapshots (never created inside the repo, but just in case)
+/instances.json
+
+# Local environment and secrets
+.env
+.env.*
