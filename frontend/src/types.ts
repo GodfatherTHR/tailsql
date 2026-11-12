@@ -195,6 +195,16 @@ export interface AppErrorEvent {
   message: string;
 }
 
+export interface RealtimeChangeEvent {
+  instanceId: string;
+  schema?: string;
+  table?: string;
+  operation: string;
+  source: string;
+  updateCount?: number;
+  at: string;
+}
+
 export interface LogRequest {
   id: string;
   lines: number;

@@ -60,6 +60,7 @@ interface DesktopBridge {
     values: Record<string, string | null>;
     key: Record<string, string | null>;
   }): Promise<TableMutationResult>;
+  DropTable(request: { id: string; schema: string; table: string }): Promise<void>;
   GetFunnelState(id: string): Promise<FunnelState>;
   EnableFunnel(request: { id: string; port: number }): Promise<FunnelState>;
   DisableFunnel(id: string): Promise<FunnelState>;
@@ -131,6 +132,8 @@ export const api = {
     key: Record<string, string | null>,
   ): Promise<TableMutationResult> =>
     desktop().DeleteTableRow({ id, schema: table.schema, table: table.name, values: {}, key }),
+  dropTable: (id: string, table: { schema: string; name: string }): Promise<void> =>
+    desktop().DropTable({ id, schema: table.schema, table: table.name }),
   getFunnelState: (id: string): Promise<FunnelState> => desktop().GetFunnelState(id),
   enableFunnel: (id: string, port: number): Promise<FunnelState> =>
     desktop().EnableFunnel({ id, port }),

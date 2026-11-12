@@ -126,6 +126,16 @@ func (r *Runner) Delete(ctx context.Context, request RowMutation) (int64, error)
 	return r.mutate(ctx, request.InstanceID, statement)
 }
 
+// DropTable removes a table together with all of its rows.
+func (r *Runner) DropTable(ctx context.Context, instanceID, schema, table string) error {
+	statement, err := buildDropTableSQL(schema, table)
+	if err != nil {
+		return err
+	}
+	_, err = r.mutate(ctx, instanceID, statement)
+	return err
+}
+
 func (r *Runner) mutate(ctx context.Context, instanceID, statement string) (int64, error) {
 	url, username, password, err := r.provider.ConnectionInfo(instanceID)
 	if err != nil {
@@ -221,6 +231,14 @@ func buildDeleteSQL(schema, table string, key map[string]*string) (string, error
 		return "", err
 	}
 	return "DELETE FROM " + target + " WHERE " + where, nil
+}
+
+func buildDropTableSQL(schema, table string) (string, error) {
+	target, err := quoteTarget(schema, table)
+	if err != nil {
+		return "", err
+	}
+	return "DROP TABLE " + target, nil
 }
 
 func buildWhere(key map[string]*string) (string, error) {

@@ -94,6 +94,20 @@ func TestBuildDeleteSQL(t *testing.T) {
 	}
 }
 
+func TestBuildDropTableSQL(t *testing.T) {
+	statement, err := buildDropTableSQL("inventory", "products")
+	if err != nil {
+		t.Fatalf("build drop table SQL: %v", err)
+	}
+	want := `DROP TABLE "inventory"."products"`
+	if statement != want {
+		t.Fatalf("unexpected SQL:\n got: %s\nwant: %s", statement, want)
+	}
+	if _, err := buildDropTableSQL("", "products"); err == nil {
+		t.Fatal("expected an error for an empty schema")
+	}
+}
+
 func TestQuoteIdentifierEscapesInjection(t *testing.T) {
 	quoted, err := quoteIdentifier(`x"; DROP TABLE products; --`)
 	if err != nil {

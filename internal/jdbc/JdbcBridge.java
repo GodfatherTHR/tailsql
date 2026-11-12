@@ -54,6 +54,7 @@ public final class JdbcBridge {
         try {
             DriverManager.setLoginTimeout(15);
             connection = DriverManager.getConnection(url, user, password);
+            ensureDurableWrites(connection);
             switch (mode) {
                 case "ping":
                     ping(connection, startedAt);
@@ -89,6 +90,20 @@ public final class JdbcBridge {
         }
         OUT.flush();
         System.exit(exitCode);
+    }
+
+    /**
+     * H2 applies the write delay while opening the database and resets it to
+     * the connection property afterwards, so the URL carries it for fresh
+     * opens and this statement covers databases another client already holds
+     * open. Non-admin users cannot change it, which is safe to ignore.
+     */
+    private static void ensureDurableWrites(Connection connection) {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("SET WRITE_DELAY 0");
+        } catch (SQLException ignored) {
+            // The URL property remains the best-effort setting for this user.
+        }
     }
 
     private static void ping(Connection connection, long startedAt) throws SQLException {

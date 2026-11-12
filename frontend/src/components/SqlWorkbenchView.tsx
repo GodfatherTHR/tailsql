@@ -10,7 +10,7 @@ import {
   Terminal,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import type { Instance, QueryResult, SchemaSnapshot, TableInfo } from '../types';
+import type { Instance, QueryResult, RealtimeChangeEvent, SchemaSnapshot, TableInfo } from '../types';
 import { api, errorMessage } from '../lib/api';
 import { formatDuration, formatTime } from '../lib/format';
 import { SchemaBrowser } from './SchemaBrowser';
@@ -20,6 +20,7 @@ interface SqlWorkbenchViewProps {
   busy: string | null;
   onStart: () => void;
   onOpenTable: (table: TableInfo) => void;
+  realtimeEvent: RealtimeChangeEvent | null;
 }
 
 const sampleQueries = [
@@ -28,25 +29,104 @@ const sampleQueries = [
   { label: 'INFORMATION_SCHEMA', sql: 'SELECT * FROM INFORMATION_SCHEMA.TABLES LIMIT 20;' },
 ];
 
-export function SqlWorkbenchView({ instance, busy, onStart, onOpenTable }: SqlWorkbenchViewProps) {
-  const [query, setQuery] = useState('SELECT 1;');
-  const [result, setResult] = useState<QueryResult | null>(null);
-  const [error, setError] = useState('');
+interface WorkbenchDraft {
+  query: string;
+  result: QueryResult | null;
+  error: string;
+}
+
+const drafts = new Map<string, WorkbenchDraft>();
+
+function draftStorageKey(instanceId: string): string {
+  return `tailsql.workbench.query.${instanceId}`;
+}
+
+function loadDraft(instanceId: string): WorkbenchDraft {
+  const cached = drafts.get(instanceId);
+  if (cached) {
+    return cached;
+  }
+  let query = 'SELECT 1;';
+  try {
+    const stored = window.localStorage.getItem(draftStorageKey(instanceId));
+    if (stored !== null) {
+      query = stored;
+    }
+  } catch {
+    // A locked-down WebView may reject storage; the in-memory draft still survives view switches.
+  }
+  return { query, result: null, error: '' };
+}
+
+function storeDraft(instanceId: string, draft: WorkbenchDraft): void {
+  drafts.set(instanceId, draft);
+  try {
+    window.localStorage.setItem(draftStorageKey(instanceId), draft.query);
+  } catch {
+    // Query persistence across restarts is optional.
+  }
+}
+
+export function SqlWorkbenchView({
+  instance,
+  busy,
+  onStart,
+  onOpenTable,
+  realtimeEvent,
+}: SqlWorkbenchViewProps) {
+  const [query, setQuery] = useState(() => loadDraft(instance.id).query);
+  const [result, setResult] = useState<QueryResult | null>(() => loadDraft(instance.id).result);
+  const [error, setError] = useState(() => loadDraft(instance.id).error);
+  const [draftInstanceId, setDraftInstanceId] = useState(instance.id);
   const [running, setRunning] = useState(false);
   const [schema, setSchema] = useState<SchemaSnapshot | null>(null);
   const [schemaError, setSchemaError] = useState('');
   const [schemaLoading, setSchemaLoading] = useState(false);
   const [schemaToken, setSchemaToken] = useState(0);
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const handledRealtime = useRef('');
+  const schemaRefreshAt = useRef(0);
 
   const live = instance.status === 'running';
   const starting = instance.status === 'starting';
 
   useEffect(() => {
-    setQuery('SELECT 1;');
-    setResult(null);
-    setError('');
-  }, [instance.id]);
+    if (draftInstanceId === instance.id) {
+      return;
+    }
+    const draft = loadDraft(instance.id);
+    setQuery(draft.query);
+    setResult(draft.result);
+    setError(draft.error);
+    setDraftInstanceId(instance.id);
+    handledRealtime.current = '';
+  }, [instance.id, draftInstanceId]);
+
+  useEffect(() => {
+    if (draftInstanceId !== instance.id) {
+      return;
+    }
+    storeDraft(instance.id, { query, result, error });
+  }, [instance.id, draftInstanceId, query, result, error]);
+
+  useEffect(() => {
+    if (!realtimeEvent || realtimeEvent.instanceId !== instance.id) {
+      return;
+    }
+    const eventKey = `${realtimeEvent.at}|${realtimeEvent.operation}|${realtimeEvent.schema ?? ''}|${realtimeEvent.table ?? ''}`;
+    if (handledRealtime.current === eventKey) {
+      return;
+    }
+    handledRealtime.current = eventKey;
+    if (realtimeEvent.operation === 'ddl') {
+      setSchemaToken((value) => value + 1);
+      return;
+    }
+    if (!realtimeEvent.table && Date.now() - schemaRefreshAt.current > 4000) {
+      schemaRefreshAt.current = Date.now();
+      setSchemaToken((value) => value + 1);
+    }
+  }, [realtimeEvent, instance.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,15 +198,29 @@ export function SqlWorkbenchView({ instance, busy, onStart, onOpenTable }: SqlWo
             Results are capped at 500 rows.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => setSchemaToken((value) => value + 1)}
-          disabled={!live || schemaLoading}
-        >
-          <RefreshCw size={14} className={schemaLoading ? 'animate-spin' : ''} />
-          Refresh schema
-        </button>
+        <div className="flex items-center gap-2">
+          {live ? (
+            <span
+              className="chip border-mint-400/20 text-mint-300"
+              title="Schema refreshes automatically when any client changes the database"
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint-300 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mint-300" />
+              </span>
+              Live
+            </span>
+          ) : null}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setSchemaToken((value) => value + 1)}
+            disabled={!live || schemaLoading}
+          >
+            <RefreshCw size={14} className={schemaLoading ? 'animate-spin' : ''} />
+            Refresh schema
+          </button>
+        </div>
       </div>
 
       {!live ? (

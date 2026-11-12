@@ -54,6 +54,11 @@ func FindAvailablePort(host string, start, attempts int) (int, error) {
 }
 
 // LocalJDBCURL builds the loopback JDBC URL for an instance.
+//
+// WRITE_DELAY=0 makes H2 flush and fsync every commit. TailSQL runs each
+// operation on a fresh JDBC connection and H2 closes the database when the
+// last connection closes, so the setting has to be part of every connection;
+// a one-off SET WRITE_DELAY is discarded when that connection closes.
 func LocalJDBCURL(name string, port int) string {
-	return fmt.Sprintf("jdbc:h2:tcp://127.0.0.1:%d/./%s", port, name)
+	return fmt.Sprintf("jdbc:h2:tcp://127.0.0.1:%d/./%s;WRITE_DELAY=0", port, name)
 }

@@ -15,6 +15,8 @@ export function DisableFunnel(arg1:string):Promise<tailscale.FunnelState>;
 
 export function DisableTailscaleHosting(arg1:string):Promise<main.InstanceView>;
 
+export function DropTable(arg1:main.TableDropRequest):Promise<void>;
+
 export function EnableFunnel(arg1:main.FunnelRequest):Promise<tailscale.FunnelState>;
 
 export function EnableTailscaleHosting(arg1:string):Promise<tailscale.Snapshot>;

@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, Loader2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TableInfo } from '../types';
 import { Modal } from './Modal';
 
@@ -43,14 +43,26 @@ export function RowEditorModal({
 }: RowEditorModalProps) {
   const [fields, setFields] = useState<RowEditorField[]>([]);
   const [localError, setLocalError] = useState('');
+  // The schema snapshot is replaced after a live refresh, which gives the
+  // table prop a new identity. Rebuild the form only when the editor opens for
+  // a different row/table so in-progress typing survives background refreshes.
+  const formKey = open
+    ? `${mode}:${table?.schema ?? ''}.${table?.name ?? ''}:${row ? row.join('\u0001') : 'new'}`
+    : '';
+  const loadedKey = useRef('');
 
   useEffect(() => {
     if (!open || !table) {
+      loadedKey.current = '';
       return;
     }
+    if (loadedKey.current === formKey) {
+      return;
+    }
+    loadedKey.current = formKey;
     setFields(buildFields(table, row, mode));
     setLocalError('');
-  }, [open, mode, table, row]);
+  }, [open, mode, table, row, formKey]);
 
   const updateField = (name: string, patch: Partial<RowEditorField>) => {
     setFields((current) =>

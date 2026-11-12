@@ -121,6 +121,13 @@ type TableMutationResult struct {
 	UpdateCount int64 `json:"updateCount"`
 }
 
+// TableDropRequest removes one table and all of its rows.
+type TableDropRequest struct {
+	ID     string `json:"id"`
+	Schema string `json:"schema"`
+	Table  string `json:"table"`
+}
+
 // FunnelRequest selects the public port for Tailscale Funnel.
 type FunnelRequest struct {
 	ID   string `json:"id"`

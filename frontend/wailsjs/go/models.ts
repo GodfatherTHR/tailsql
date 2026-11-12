@@ -439,6 +439,22 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class TableDropRequest {
+	    id: string;
+	    schema: string;
+	    table: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TableDropRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.schema = source["schema"];
+	        this.table = source["table"];
+	    }
+	}
 	export class string {
 	
 	

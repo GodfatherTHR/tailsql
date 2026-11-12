@@ -25,14 +25,17 @@ const (
 type App struct {
 	version string
 
-	mu           sync.RWMutex
-	ctx          context.Context
-	store        *config.Store
-	manager      *dbmanager.Manager
-	hosts        *tailscale.HostManager
-	health       SystemHealth
-	initErr      error
-	shuttingDown atomic.Bool
+	mu             sync.RWMutex
+	ctx            context.Context
+	store          *config.Store
+	manager        *dbmanager.Manager
+	hosts          *tailscale.HostManager
+	health         SystemHealth
+	initErr        error
+	shuttingDown   atomic.Bool
+	realtimeCancel context.CancelFunc
+	realtimeStamps map[string]databaseStamp
+	realtimeEcho   map[string]time.Time
 }
 
 // NewApp builds the application facade; initialization happens in startup.
@@ -127,6 +130,8 @@ func (a *App) startup(ctx context.Context) {
 	manager.Reconcile(reconcileContext)
 	cancelReconcile()
 
+	a.startRealtimeWatcher()
+
 	a.mu.Lock()
 	a.health.Java = manager.Java()
 	a.health.H2 = manager.H2()
@@ -141,6 +146,7 @@ func (a *App) startup(ctx context.Context) {
 
 func (a *App) shutdown(_ context.Context) {
 	a.shuttingDown.Store(true)
+	a.stopRealtimeWatcher()
 	a.mu.RLock()
 	hosts := a.hosts
 	manager := a.manager

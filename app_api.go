@@ -588,6 +588,7 @@ func (a *App) ExecuteQuery(request QueryRequest) (QueryResult, error) {
 	if err := a.ready(); err != nil {
 		return QueryResult{}, err
 	}
+	defer a.markDatabaseActivity(request.ID)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -596,6 +597,16 @@ func (a *App) ExecuteQuery(request QueryRequest) (QueryResult, error) {
 	result, err := runner.Execute(ctx, request.ID, request.SQL)
 	if err != nil {
 		return QueryResult{}, err
+	}
+	if operation, schema, table := mutationTarget(request.SQL); operation != "" {
+		a.emitRealtimeChange(RealtimeChangeEvent{
+			InstanceID:  request.ID,
+			Schema:      schema,
+			Table:       table,
+			Operation:   operation,
+			Source:      "sql-workbench",
+			UpdateCount: result.UpdateCount,
+		})
 	}
 	columns := result.Columns
 	if columns == nil {
@@ -623,6 +634,7 @@ func (a *App) ListTables(id string) (jdbc.SchemaSnapshot, error) {
 	if err := a.ready(); err != nil {
 		return jdbc.SchemaSnapshot{}, err
 	}
+	defer a.markDatabaseActivity(id)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -635,6 +647,7 @@ func (a *App) GetTableRows(request TableRowsRequest) (TableRowsResult, error) {
 	if err := a.ready(); err != nil {
 		return TableRowsResult{}, err
 	}
+	defer a.markDatabaseActivity(request.ID)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -665,6 +678,7 @@ func (a *App) InsertTableRow(request TableMutationRequest) (TableMutationResult,
 	if err := a.ready(); err != nil {
 		return TableMutationResult{}, err
 	}
+	defer a.markDatabaseActivity(request.ID)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -673,6 +687,14 @@ func (a *App) InsertTableRow(request TableMutationRequest) (TableMutationResult,
 	if err != nil {
 		return TableMutationResult{}, err
 	}
+	a.emitRealtimeChange(RealtimeChangeEvent{
+		InstanceID:  request.ID,
+		Schema:      request.Schema,
+		Table:       request.Table,
+		Operation:   "insert",
+		Source:      "table-editor",
+		UpdateCount: count,
+	})
 	return TableMutationResult{UpdateCount: count}, nil
 }
 
@@ -681,6 +703,7 @@ func (a *App) UpdateTableRow(request TableMutationRequest) (TableMutationResult,
 	if err := a.ready(); err != nil {
 		return TableMutationResult{}, err
 	}
+	defer a.markDatabaseActivity(request.ID)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -689,6 +712,14 @@ func (a *App) UpdateTableRow(request TableMutationRequest) (TableMutationResult,
 	if err != nil {
 		return TableMutationResult{}, err
 	}
+	a.emitRealtimeChange(RealtimeChangeEvent{
+		InstanceID:  request.ID,
+		Schema:      request.Schema,
+		Table:       request.Table,
+		Operation:   "update",
+		Source:      "table-editor",
+		UpdateCount: count,
+	})
 	return TableMutationResult{UpdateCount: count}, nil
 }
 
@@ -697,6 +728,7 @@ func (a *App) DeleteTableRow(request TableMutationRequest) (TableMutationResult,
 	if err := a.ready(); err != nil {
 		return TableMutationResult{}, err
 	}
+	defer a.markDatabaseActivity(request.ID)
 	manager, _, _ := a.components()
 	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
 	defer cancel()
@@ -705,7 +737,38 @@ func (a *App) DeleteTableRow(request TableMutationRequest) (TableMutationResult,
 	if err != nil {
 		return TableMutationResult{}, err
 	}
+	a.emitRealtimeChange(RealtimeChangeEvent{
+		InstanceID:  request.ID,
+		Schema:      request.Schema,
+		Table:       request.Table,
+		Operation:   "delete",
+		Source:      "table-editor",
+		UpdateCount: count,
+	})
 	return TableMutationResult{UpdateCount: count}, nil
+}
+
+// DropTable removes a table and all of its rows through the table editor.
+func (a *App) DropTable(request TableDropRequest) error {
+	if err := a.ready(); err != nil {
+		return err
+	}
+	defer a.markDatabaseActivity(request.ID)
+	manager, _, _ := a.components()
+	ctx, cancel := context.WithTimeout(a.baseContext(), 30*time.Second)
+	defer cancel()
+	runner := sqlrunner.New(manager, manager.Bridge())
+	if err := runner.DropTable(ctx, request.ID, request.Schema, request.Table); err != nil {
+		return err
+	}
+	a.emitRealtimeChange(RealtimeChangeEvent{
+		InstanceID: request.ID,
+		Schema:     request.Schema,
+		Table:      request.Table,
+		Operation:  "ddl",
+		Source:     "table-editor",
+	})
+	return nil
 }
 
 func mutationFromRequest(request TableMutationRequest) sqlrunner.RowMutation {

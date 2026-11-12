@@ -87,6 +87,32 @@ func TestLifecycleIntegration(t *testing.T) {
 	bridge := manager.Bridge()
 	url := LocalJDBCURL(created.Name, created.Port)
 
+	durability, err := bridge.Execute(ctx, url, created.Username, created.Password,
+		"SELECT SETTING_VALUE FROM INFORMATION_SCHEMA.SETTINGS WHERE SETTING_NAME='WRITE_DELAY'")
+	if err != nil {
+		t.Fatalf("read durability setting: %v", err)
+	}
+	if durability.RowCount == 0 {
+		t.Fatal("WRITE_DELAY was not reported for a fresh connection")
+	}
+	for _, row := range durability.Rows {
+		if len(row) == 0 || row[0] == nil || *row[0] != "0" {
+			t.Fatalf("WRITE_DELAY was not 0 on every reported setting: %+v", durability.Rows)
+		}
+	}
+	// Execute always launches a new JVM and opens a new connection. The live
+	// MVStore value must be 0 there too, not just in the first session.
+	fresh, err := manager.Bridge().Execute(ctx, url, created.Username, created.Password,
+		"SELECT SETTING_VALUE FROM INFORMATION_SCHEMA.SETTINGS WHERE SETTING_NAME='WRITE_DELAY'")
+	if err != nil {
+		t.Fatalf("read durability setting from a fresh connection: %v", err)
+	}
+	for _, row := range fresh.Rows {
+		if len(row) == 0 || row[0] == nil || *row[0] != "0" {
+			t.Fatalf("WRITE_DELAY was not durable on a new connection: %+v", fresh.Rows)
+		}
+	}
+
 	if _, err := bridge.Execute(ctx, url, created.Username, created.Password,
 		"CREATE TABLE items(id INT PRIMARY KEY, name VARCHAR(40))"); err != nil {
 		t.Fatalf("create table: %v", err)

@@ -16,6 +16,7 @@ import type {
   FunnelState,
   Instance,
   ProxySnapshot,
+  RealtimeChangeEvent,
   SystemHealth,
   TableInfo,
   TailscaleStatus,
@@ -52,6 +53,7 @@ export default function App() {
   const [view, setView] = useState<ViewKey>('overview');
   const [proxies, setProxies] = useState<Record<string, ProxySnapshot>>({});
   const [funnels, setFunnels] = useState<Record<string, FunnelState>>({});
+  const [realtimeEvent, setRealtimeEvent] = useState<RealtimeChangeEvent | null>(null);
   const [funnelLoading, setFunnelLoading] = useState(false);
   const [funnelBusy, setFunnelBusy] = useState(false);
   const [funnelToken, setFunnelToken] = useState(0);
@@ -161,18 +163,26 @@ export default function App() {
         push('error', event.message);
       }
     };
+    const handleRealtime = (...args: unknown[]) => {
+      const event = args[0] as RealtimeChangeEvent;
+      if (event?.instanceId) {
+        setRealtimeEvent(event);
+      }
+    };
 
     EventsOn('instances:changed', handleInstances);
     EventsOn('tailscale:status', handleTailscale);
     EventsOn('proxy:snapshot', handleProxy);
     EventsOn('funnel:state', handleFunnel);
     EventsOn('app:error', handleError);
+    EventsOn('realtime:change', handleRealtime);
     return () => {
       EventsOff('instances:changed');
       EventsOff('tailscale:status');
       EventsOff('proxy:snapshot');
       EventsOff('funnel:state');
       EventsOff('app:error');
+      EventsOff('realtime:change');
     };
   }, [push]);
 
@@ -623,6 +633,7 @@ export default function App() {
                   busy={busy}
                   onStart={handleStart}
                   initialTable={tableTarget}
+                  realtimeEvent={realtimeEvent}
                   onToast={push}
                 />
               ) : view === 'java' ? (
@@ -638,6 +649,7 @@ export default function App() {
                   busy={busy}
                   onStart={handleStart}
                   onOpenTable={openTableEditor}
+                  realtimeEvent={realtimeEvent}
                 />
               )}
             </div>

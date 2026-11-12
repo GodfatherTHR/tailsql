@@ -22,6 +22,10 @@ export function DisableTailscaleHosting(arg1) {
   return window['go']['main']['App']['DisableTailscaleHosting'](arg1);
 }
 
+export function DropTable(arg1) {
+  return window['go']['main']['App']['DropTable'](arg1);
+}
+
 export function EnableFunnel(arg1) {
   return window['go']['main']['App']['EnableFunnel'](arg1);
 }

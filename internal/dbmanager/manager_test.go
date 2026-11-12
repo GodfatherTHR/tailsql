@@ -85,7 +85,7 @@ func TestFindAvailablePortSkipsOccupied(t *testing.T) {
 
 func TestLocalJDBCURL(t *testing.T) {
 	got := LocalJDBCURL("inventory_db", 9092)
-	want := "jdbc:h2:tcp://127.0.0.1:9092/./inventory_db"
+	want := "jdbc:h2:tcp://127.0.0.1:9092/./inventory_db;WRITE_DELAY=0"
 	if got != want {
 		t.Fatalf("LocalJDBCURL = %q, want %q", got, want)
 	}

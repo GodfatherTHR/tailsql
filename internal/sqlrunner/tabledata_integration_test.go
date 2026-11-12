@@ -205,4 +205,17 @@ func TestTableDataIntegration(t *testing.T) {
 	if len(secondPage.Rows) != 2 || secondPage.HasMore {
 		t.Fatalf("unexpected second page: rows=%d hasMore=%v", len(secondPage.Rows), secondPage.HasMore)
 	}
+
+	if err := runner.DropTable(ctx, "", "PUBLIC", "ITEMS"); err != nil {
+		t.Fatalf("drop table: %v", err)
+	}
+	schema, err = bridge.Tables(ctx, url, "sa", "")
+	if err != nil {
+		t.Fatalf("read schema after drop: %v", err)
+	}
+	for _, table := range schema.Tables {
+		if table.Name == "ITEMS" {
+			t.Fatal("ITEMS is still present after DropTable")
+		}
+	}
 }

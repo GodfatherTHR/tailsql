@@ -15,9 +15,16 @@ import {
   Table2,
   Trash2,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Instance, SchemaSnapshot, TableInfo, TableRowsResult } from '../types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  Instance,
+  RealtimeChangeEvent,
+  SchemaSnapshot,
+  TableInfo,
+  TableRowsResult,
+} from '../types';
 import { api, errorMessage } from '../lib/api';
+import { formatTime } from '../lib/format';
 import type { ToastKind } from '../hooks/useToasts';
 import { ConfirmDialog } from './ConfirmDialog';
 import { RowEditorModal, isEditableTable, tableRowKey } from './RowEditorModal';
@@ -28,6 +35,7 @@ interface TableEditorViewProps {
   busy: string | null;
   onStart: () => void;
   initialTable: { schema: string; name: string } | null;
+  realtimeEvent: RealtimeChangeEvent | null;
   onToast: (kind: ToastKind, message: string) => void;
 }
 
@@ -48,6 +56,7 @@ export function TableEditorView({
   busy,
   onStart,
   initialTable,
+  realtimeEvent,
   onToast,
 }: TableEditorViewProps) {
   const [schema, setSchema] = useState<SchemaSnapshot | null>(null);
@@ -70,6 +79,13 @@ export function TableEditorView({
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [dropTarget, setDropTarget] = useState<TableInfo | null>(null);
+  const [dropping, setDropping] = useState(false);
+  const [lastRealtimeAt, setLastRealtimeAt] = useState<string | null>(null);
+
+  const sortInitializedFor = useRef<string | null>(null);
+  const handledRealtime = useRef('');
+  const schemaRefreshAt = useRef(0);
 
   const live = instance.status === 'running';
   const starting = instance.status === 'starting';
@@ -85,17 +101,22 @@ export function TableEditorView({
     setDescending(false);
     setEditor(null);
     setDeleteTarget(null);
+    setDropTarget(null);
+    setLastRealtimeAt(null);
+    sortInitializedFor.current = null;
+    handledRealtime.current = '';
   }, [instance.id]);
 
   useEffect(() => {
     if (!initialTable) {
       return;
     }
-    setSelectedKey(`${initialTable.schema}.${initialTable.name}`);
+    const nextKey = `${initialTable.schema}.${initialTable.name}`;
+    setSelectedKey(nextKey);
+    storeTableSelection(instance.id, nextKey);
+    sortInitializedFor.current = null;
     setOffset(0);
-    setOrderBy('');
-    setDescending(false);
-  }, [initialTable?.schema, initialTable?.name]);
+  }, [initialTable?.schema, initialTable?.name, instance.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,21 +151,50 @@ export function TableEditorView({
   }, [instance.id, instance.status, live, schemaToken]);
 
   useEffect(() => {
-    if (!schema || selectedKey) {
+    if (!schema) {
       return;
     }
-    const first = schema.tables[0];
-    if (first) {
-      setSelectedKey(`${first.schema}.${first.name}`);
+    const selectedExists = selectedKey
+      ? schema.tables.some((table) => tableKey(table) === selectedKey)
+      : false;
+    if (selectedExists) {
+      return;
     }
-  }, [schema, selectedKey]);
+    const stored = readTableSelection(instance.id);
+    const restored = stored
+      ? schema.tables.find((table) => tableKey(table) === stored) ?? null
+      : null;
+    const target = restored ?? schema.tables[0] ?? null;
+    if (!target) {
+      setSelectedKey(null);
+      return;
+    }
+    const nextKey = tableKey(target);
+    setSelectedKey(nextKey);
+    storeTableSelection(instance.id, nextKey);
+    setOffset(0);
+  }, [schema, selectedKey, instance.id]);
 
   const selectedTable = useMemo(() => {
     if (!schema || !selectedKey) {
       return null;
     }
-    return schema.tables.find((table) => `${table.schema}.${table.name}` === selectedKey) ?? null;
+    return schema.tables.find((table) => tableKey(table) === selectedKey) ?? null;
   }, [schema, selectedKey]);
+
+  useEffect(() => {
+    if (!selectedKey || !selectedTable) {
+      return;
+    }
+    if (sortInitializedFor.current === selectedKey) {
+      return;
+    }
+    sortInitializedFor.current = selectedKey;
+    const primary = selectedTable.primaryKey[0] ?? '';
+    setOrderBy(primary);
+    setDescending(primary !== '');
+    setOffset(0);
+  }, [selectedKey, selectedTable]);
 
   const writable = selectedTable ? selectedTable.type.toUpperCase().includes('TABLE') : false;
   const editable = selectedTable ? isEditableTable(selectedTable) : false;
@@ -192,14 +242,47 @@ export function TableEditorView({
     rowsToken,
   ]);
 
-  const selectTable = useCallback((table: TableInfo) => {
-    setSelectedKey(`${table.schema}.${table.name}`);
-    setOffset(0);
-    setOrderBy('');
-    setDescending(false);
-    setRows(null);
-    setRowsError('');
-  }, []);
+  useEffect(() => {
+    if (!realtimeEvent || realtimeEvent.instanceId !== instance.id) {
+      return;
+    }
+    const eventKey = `${realtimeEvent.at}|${realtimeEvent.operation}|${realtimeEvent.schema ?? ''}|${realtimeEvent.table ?? ''}`;
+    if (handledRealtime.current === eventKey) {
+      return;
+    }
+    handledRealtime.current = eventKey;
+    setLastRealtimeAt(realtimeEvent.at);
+
+    const changedTable = realtimeEvent.table?.toLowerCase() ?? '';
+    const matchesSelection =
+      changedTable === '' ||
+      (selectedTable !== null &&
+        changedTable === selectedTable.name.toLowerCase() &&
+        (!realtimeEvent.schema ||
+          realtimeEvent.schema.toLowerCase() === selectedTable.schema.toLowerCase()));
+    if (matchesSelection) {
+      setRowsToken((value) => value + 1);
+    }
+    if (
+      (changedTable === '' || realtimeEvent.operation === 'ddl') &&
+      Date.now() - schemaRefreshAt.current > 4000
+    ) {
+      schemaRefreshAt.current = Date.now();
+      setSchemaToken((value) => value + 1);
+    }
+  }, [realtimeEvent, instance.id, selectedTable]);
+
+  const selectTable = useCallback(
+    (table: TableInfo) => {
+      const nextKey = tableKey(table);
+      setSelectedKey(nextKey);
+      storeTableSelection(instance.id, nextKey);
+      setOffset(0);
+      setRows(null);
+      setRowsError('');
+    },
+    [instance.id],
+  );
 
   const handleSort = (columnName: string) => {
     if (orderBy.toLowerCase() === columnName.toLowerCase()) {
@@ -264,6 +347,11 @@ export function TableEditorView({
       const result = await api.insertTableRow(instance.id, selectedTable, values);
       onToast('success', `Inserted ${result.updateCount} row${result.updateCount === 1 ? '' : 's'}.`);
       setEditor(null);
+      const primary = selectedTable.primaryKey[0];
+      if (primary) {
+        setOrderBy(primary);
+        setDescending(true);
+      }
       setOffset(0);
       setRowsToken((value) => value + 1);
     } catch (mutationError) {
@@ -293,6 +381,29 @@ export function TableEditorView({
     }
   };
 
+  const confirmDropTable = async () => {
+    if (!dropTarget) {
+      return;
+    }
+    setDropping(true);
+    try {
+      await api.dropTable(instance.id, dropTarget);
+      onToast('success', `Dropped ${dropTarget.schema}.${dropTarget.name}.`);
+      if (selectedTable && tableKey(selectedTable) === tableKey(dropTarget)) {
+        setSelectedKey(null);
+        setRows(null);
+        setRowsError('');
+        setOffset(0);
+      }
+      setDropTarget(null);
+      setSchemaToken((value) => value + 1);
+    } catch (dropError) {
+      onToast('error', errorMessage(dropError));
+    } finally {
+      setDropping(false);
+    }
+  };
+
   const refreshAll = () => {
     setSchemaToken((value) => value + 1);
     setRowsToken((value) => value + 1);
@@ -309,7 +420,8 @@ export function TableEditorView({
           <h1 className="text-xl font-semibold tracking-tight text-slate-100">Browse &amp; edit data</h1>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-slate-500">
             Click a table in the schema tree to inspect its rows. Changes are applied as normal H2
-            SQL statements against <span className="font-mono text-slate-400">{instance.name}</span>.
+            SQL statements against <span className="font-mono text-slate-400">{instance.name}</span>{' '}
+            and committed to disk immediately. Other clients&apos; writes appear here live.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -317,6 +429,22 @@ export function TableEditorView({
             <span className="chip">
               <Table2 size={11} />
               {selectedTable.schema}.{selectedTable.name}
+            </span>
+          ) : null}
+          {live ? (
+            <span
+              className="chip border-mint-400/20 text-mint-300"
+              title={
+                lastRealtimeAt
+                  ? `Last database change at ${formatTime(lastRealtimeAt)}`
+                  : 'Watching this database for changes from every connected client'
+              }
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint-300 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mint-300" />
+              </span>
+              Live
             </span>
           ) : null}
           <button
@@ -327,6 +455,24 @@ export function TableEditorView({
           >
             <RefreshCw size={14} className={schemaLoading || rowsLoading ? 'animate-spin' : ''} />
             Refresh
+          </button>
+          <button
+            type="button"
+            className="btn-secondary border-rose-500/20 text-rose-300 hover:border-rose-500/40 hover:bg-rose-500/10"
+            onClick={() => {
+              if (selectedTable) {
+                setDropTarget(selectedTable);
+              }
+            }}
+            disabled={!live || !selectedTable || !writable}
+            title={
+              selectedTable && writable
+                ? `Drop ${selectedTable.schema}.${selectedTable.name} and all of its rows`
+                : 'Select a base table to drop'
+            }
+          >
+            <Trash2 size={14} />
+            Drop table
           </button>
           <button
             type="button"
@@ -700,6 +846,48 @@ export function TableEditorView({
           }
         }}
       />
+
+      <ConfirmDialog
+        open={Boolean(dropTarget)}
+        title="Drop table"
+        description={
+          dropTarget
+            ? `Drop ${dropTarget.schema}.${dropTarget.name} and permanently delete all of its rows? Views and foreign keys that depend on it will make the drop fail. This cannot be undone.`
+            : ''
+        }
+        confirmLabel="Drop table"
+        busy={dropping}
+        onConfirm={() => void confirmDropTable()}
+        onCancel={() => {
+          if (!dropping) {
+            setDropTarget(null);
+          }
+        }}
+      />
     </div>
   );
+}
+
+function tableKey(table: TableInfo): string {
+  return `${table.schema}.${table.name}`;
+}
+
+function selectionStorageKey(instanceId: string): string {
+  return `tailsql.tableEditor.selection.${instanceId}`;
+}
+
+function readTableSelection(instanceId: string): string | null {
+  try {
+    return window.localStorage.getItem(selectionStorageKey(instanceId));
+  } catch {
+    return null;
+  }
+}
+
+function storeTableSelection(instanceId: string, key: string): void {
+  try {
+    window.localStorage.setItem(selectionStorageKey(instanceId), key);
+  } catch {
+    // A locked-down WebView may reject storage; selection persistence is optional.
+  }
 }
