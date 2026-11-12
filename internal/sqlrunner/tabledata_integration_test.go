@@ -4,11 +4,13 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"tailsql/internal/dbmanager"
 	"tailsql/internal/jdbc"
+	"tailsql/internal/snapshots"
 )
 
 type fixedProvider struct {
@@ -42,7 +44,9 @@ func TestTableDataIntegration(t *testing.T) {
 		t.Fatalf("materialize bridge: %v", err)
 	}
 
-	url := "jdbc:h2:file:" + filepath.ToSlash(filepath.Join(t.TempDir(), "tableeditor"))
+	dataDir := t.TempDir()
+	url := "jdbc:h2:file:" + filepath.ToSlash(filepath.Join(dataDir, "tableeditor"))
+	databasePath := filepath.Join(dataDir, "tableeditor.mv.db")
 	provider := fixedProvider{url: url, username: "sa"}
 	bridge := &jdbc.Bridge{JavaPath: java.Path, JarPath: h2.Path, ClassDir: classDir}
 	runner := New(provider, bridge)
@@ -85,6 +89,24 @@ func TestTableDataIntegration(t *testing.T) {
 	}
 	if page.Rows[0][1] == nil || *page.Rows[0][1] != "alpha" {
 		t.Fatalf("unexpected inserted value: %+v", page.Rows[0])
+	}
+
+	parameterized, err := bridge.Query(ctx, url, "sa", "",
+		"SELECT NAME FROM ITEMS WHERE ID = ?", []*string{stringPtr("1")})
+	if err != nil {
+		t.Fatalf("prepared query: %v", err)
+	}
+	if !parameterized.HasResultSet || len(parameterized.Rows) != 1 ||
+		parameterized.Rows[0][0] == nil || *parameterized.Rows[0][0] != "alpha" {
+		t.Fatalf("unexpected prepared query result: %+v", parameterized)
+	}
+	nullQuery, err := bridge.Query(ctx, url, "sa", "",
+		"SELECT NAME FROM ITEMS WHERE NOTE IS NOT DISTINCT FROM ?", []*string{nil})
+	if err != nil {
+		t.Fatalf("prepared query with NULL: %v", err)
+	}
+	if !nullQuery.HasResultSet || len(nullQuery.Rows) != 1 {
+		t.Fatalf("unexpected NULL-parameter result: %+v", nullQuery)
 	}
 
 	updated, err := runner.Update(ctx, RowMutation{
@@ -204,6 +226,91 @@ func TestTableDataIntegration(t *testing.T) {
 	}
 	if len(secondPage.Rows) != 2 || secondPage.HasMore {
 		t.Fatalf("unexpected second page: rows=%d hasMore=%v", len(secondPage.Rows), secondPage.HasMore)
+	}
+
+	if _, err := bridge.Execute(ctx, url, "sa", "",
+		"CREATE TABLE PARENTS(ID INT PRIMARY KEY, LABEL VARCHAR(30))"); err != nil {
+		t.Fatalf("create parents: %v", err)
+	}
+	if _, err := bridge.Execute(ctx, url, "sa", "",
+		"CREATE TABLE CHILDREN(ID INT PRIMARY KEY, PARENT_ID INT, "+
+			"CONSTRAINT FK_CHILD_PARENT FOREIGN KEY (PARENT_ID) REFERENCES PARENTS(ID))"); err != nil {
+		t.Fatalf("create children: %v", err)
+	}
+	if _, err := bridge.Execute(ctx, url, "sa", "",
+		"CREATE INDEX IDX_CHILD_PARENT ON CHILDREN(PARENT_ID)"); err != nil {
+		t.Fatalf("create index: %v", err)
+	}
+	schema, err = bridge.Tables(ctx, url, "sa", "")
+	if err != nil {
+		t.Fatalf("read relation metadata: %v", err)
+	}
+	var children *jdbc.TableInfo
+	for index := range schema.Tables {
+		if schema.Tables[index].Name == "CHILDREN" {
+			children = &schema.Tables[index]
+		}
+	}
+	if children == nil {
+		t.Fatal("CHILDREN table metadata is missing")
+	}
+	if len(children.ForeignKeys) != 1 ||
+		!strings.EqualFold(children.ForeignKeys[0].ReferencedTable, "PARENTS") {
+		t.Fatalf("unexpected foreign keys: %+v", children.ForeignKeys)
+	}
+	foundIndex := false
+	for _, index := range children.Indexes {
+		if strings.EqualFold(index.Name, "IDX_CHILD_PARENT") {
+			foundIndex = true
+		}
+	}
+	if !foundIndex {
+		t.Fatalf("index metadata is missing: %+v", children.Indexes)
+	}
+	if _, err := bridge.Execute(ctx, url, "sa", "", "DROP TABLE CHILDREN"); err != nil {
+		t.Fatalf("drop children: %v", err)
+	}
+	if _, err := bridge.Execute(ctx, url, "sa", "", "DROP TABLE PARENTS"); err != nil {
+		t.Fatalf("drop parents: %v", err)
+	}
+
+	snapshotStore, err := snapshots.New(filepath.Join(t.TempDir(), "snapshots"))
+	if err != nil {
+		t.Fatalf("create snapshot store: %v", err)
+	}
+	backupZip := filepath.Join(t.TempDir(), "online.zip")
+	if _, err := bridge.Execute(ctx, url, "sa", "",
+		"BACKUP TO '"+filepath.ToSlash(backupZip)+"'"); err != nil {
+		t.Fatalf("online H2 backup: %v", err)
+	}
+	entry, err := snapshotStore.SaveBackup("tableeditor", backupZip, "Pre-Agent DDL")
+	if err != nil {
+		t.Fatalf("save online backup: %v", err)
+	}
+	if entry.SizeBytes <= 0 {
+		t.Fatalf("snapshot is empty: %+v", entry)
+	}
+	if _, err := bridge.Execute(ctx, url, "sa", "", "CREATE TABLE AFTER_BACKUP(ID INT)"); err != nil {
+		t.Fatalf("create post-backup table: %v", err)
+	}
+	if err := snapshotStore.Restore("tableeditor", entry.ID, databasePath); err != nil {
+		t.Fatalf("restore snapshot: %v", err)
+	}
+	schema, err = bridge.Tables(ctx, url, "sa", "")
+	if err != nil {
+		t.Fatalf("read schema after restore: %v", err)
+	}
+	foundItems := false
+	for _, table := range schema.Tables {
+		if table.Name == "AFTER_BACKUP" {
+			t.Fatal("post-backup table survived the restore")
+		}
+		if table.Name == "ITEMS" {
+			foundItems = true
+		}
+	}
+	if !foundItems {
+		t.Fatal("ITEMS is missing after the restore")
 	}
 
 	if err := runner.DropTable(ctx, "", "PUBLIC", "ITEMS"); err != nil {

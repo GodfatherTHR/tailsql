@@ -12,6 +12,7 @@ import {
   Play,
   Plus,
   RefreshCw,
+  Sparkles,
   Table2,
   Trash2,
 } from 'lucide-react';
@@ -27,6 +28,7 @@ import { api, errorMessage } from '../lib/api';
 import { formatTime } from '../lib/format';
 import type { ToastKind } from '../hooks/useToasts';
 import { ConfirmDialog } from './ConfirmDialog';
+import { Modal } from './Modal';
 import { RowEditorModal, isEditableTable, tableRowKey } from './RowEditorModal';
 import { SchemaBrowser } from './SchemaBrowser';
 
@@ -81,6 +83,10 @@ export function TableEditorView({
   const [deleting, setDeleting] = useState(false);
   const [dropTarget, setDropTarget] = useState<TableInfo | null>(null);
   const [dropping, setDropping] = useState(false);
+  const [seedOpen, setSeedOpen] = useState(false);
+  const [seedCount, setSeedCount] = useState(10);
+  const [seeding, setSeeding] = useState(false);
+  const [seedError, setSeedError] = useState('');
   const [lastRealtimeAt, setLastRealtimeAt] = useState<string | null>(null);
 
   const sortInitializedFor = useRef<string | null>(null);
@@ -102,6 +108,8 @@ export function TableEditorView({
     setEditor(null);
     setDeleteTarget(null);
     setDropTarget(null);
+    setSeedOpen(false);
+    setSeedError('');
     setLastRealtimeAt(null);
     sortInitializedFor.current = null;
     handledRealtime.current = '';
@@ -404,6 +412,29 @@ export function TableEditorView({
     }
   };
 
+  const seedRows = async () => {
+    if (!selectedTable) {
+      return;
+    }
+    setSeeding(true);
+    setSeedError('');
+    try {
+      const result = await api.seedTableRows(instance.id, selectedTable, seedCount);
+      onToast(
+        'success',
+        `Inserted ${result.inserted} row${result.inserted === 1 ? '' : 's'} (${result.generatedBy}).`,
+      );
+      setSeedOpen(false);
+      setOffset(0);
+      setRowsToken((value) => value + 1);
+    } catch (seedRunError) {
+      setSeedError(errorMessage(seedRunError));
+      onToast('error', errorMessage(seedRunError));
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const refreshAll = () => {
     setSchemaToken((value) => value + 1);
     setRowsToken((value) => value + 1);
@@ -473,6 +504,23 @@ export function TableEditorView({
           >
             <Trash2 size={14} />
             Drop table
+          </button>
+          <button
+            type="button"
+            className="btn-secondary border-mint-400/20 text-mint-300 hover:border-mint-400/40 hover:bg-mint-400/10"
+            onClick={() => {
+              setSeedError('');
+              setSeedOpen(true);
+            }}
+            disabled={!live || !selectedTable || !writable}
+            title={
+              selectedTable && writable
+                ? `Generate realistic rows for ${selectedTable.schema}.${selectedTable.name}`
+                : 'Select a base table to seed rows'
+            }
+          >
+            <Sparkles size={14} />
+            Seed rows
           </button>
           <button
             type="button"
@@ -864,6 +912,73 @@ export function TableEditorView({
           }
         }}
       />
+
+      <Modal
+        open={seedOpen}
+        onClose={() => {
+          if (!seeding) {
+            setSeedOpen(false);
+          }
+        }}
+        title="Seed realistic rows"
+        description={
+          selectedTable
+            ? `Generate and insert sample data into ${selectedTable.schema}.${selectedTable.name}. The AI uses the live column types, NOT NULL rules, and foreign keys; without a provider it falls back to deterministic type-aware data.`
+            : ''
+        }
+        size="sm"
+        preventClose={seeding}
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setSeedOpen(false)}
+              disabled={seeding}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => void seedRows()}
+              disabled={seeding}
+            >
+              {seeding ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              {seeding ? 'Generating…' : `Generate ${seedCount} rows`}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            {[10, 50].map((count) => (
+              <button
+                key={count}
+                type="button"
+                className={`btn-xs rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                  seedCount === count
+                    ? 'bg-mint-400/15 text-mint-200 ring-1 ring-mint-400/30'
+                    : 'bg-white/[0.03] text-slate-400 hover:bg-white/[0.06]'
+                }`}
+                onClick={() => setSeedCount(count)}
+                disabled={seeding}
+              >
+                {count} rows
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] leading-relaxed text-slate-500">
+            Rows are inserted in one statement. Identity and generated columns are skipped; foreign
+            keys reuse existing referenced values when available.
+          </p>
+          {seedError ? (
+            <p className="rounded-lg border border-rose-500/20 bg-rose-500/[0.05] px-3 py-2 text-[11px] leading-relaxed text-rose-200/80">
+              {seedError}
+            </p>
+          ) : null}
+        </div>
+      </Modal>
     </div>
   );
 }

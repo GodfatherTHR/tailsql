@@ -6,6 +6,8 @@ import {
   Loader2,
   Play,
   RefreshCw,
+  Settings2,
+  Sparkles,
   Table2,
   Terminal,
 } from 'lucide-react';
@@ -21,6 +23,7 @@ interface SqlWorkbenchViewProps {
   onStart: () => void;
   onOpenTable: (table: TableInfo) => void;
   realtimeEvent: RealtimeChangeEvent | null;
+  onOpenAISettings: () => void;
 }
 
 const sampleQueries = [
@@ -73,11 +76,15 @@ export function SqlWorkbenchView({
   onStart,
   onOpenTable,
   realtimeEvent,
+  onOpenAISettings,
 }: SqlWorkbenchViewProps) {
   const [query, setQuery] = useState(() => loadDraft(instance.id).query);
   const [result, setResult] = useState<QueryResult | null>(() => loadDraft(instance.id).result);
   const [error, setError] = useState(() => loadDraft(instance.id).error);
   const [draftInstanceId, setDraftInstanceId] = useState(instance.id);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [asking, setAsking] = useState(false);
+  const [aiMeta, setAiMeta] = useState('');
   const [running, setRunning] = useState(false);
   const [schema, setSchema] = useState<SchemaSnapshot | null>(null);
   const [schemaError, setSchemaError] = useState('');
@@ -187,6 +194,24 @@ export function SqlWorkbenchView({
     editorRef.current?.focus();
   };
 
+  const askAI = async () => {
+    if (!live || asking || !aiPrompt.trim()) {
+      return;
+    }
+    setAsking(true);
+    setError('');
+    try {
+      const generated = await api.generateSQL(instance.id, aiPrompt.trim());
+      setQuery(generated.sql);
+      setAiMeta(`${generated.provider} · ${generated.model}`);
+      editorRef.current?.focus();
+    } catch (aiError) {
+      setError(errorMessage(aiError));
+    } finally {
+      setAsking(false);
+    }
+  };
+
   return (
     <div className="space-y-5 animate-fade-in">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -285,6 +310,44 @@ export function SqlWorkbenchView({
                   <kbd className="rounded border border-white/10 bg-white/[0.03] px-1 py-0.5 font-mono text-[9px]">Enter</kbd>
                   <span className="ml-1.5">to run</span>
                 </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.04] bg-mint-400/[0.02] px-3 py-2">
+                <Sparkles size={13} className="flex-none text-mint-300" />
+                <input
+                  className="min-w-[160px] flex-1 bg-transparent font-mono text-[11px] text-slate-200 placeholder:text-slate-600 focus:outline-none"
+                  value={aiPrompt}
+                  onChange={(event) => setAiPrompt(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      void askAI();
+                    }
+                  }}
+                  placeholder="Ask AI to write H2 SQL (schema-aware)…"
+                  aria-label="Ask AI for SQL"
+                  disabled={!live || asking}
+                />
+                {aiMeta ? (
+                  <span className="hidden text-[9px] text-slate-600 sm:inline">{aiMeta}</span>
+                ) : null}
+                <button
+                  type="button"
+                  className="btn-secondary btn-xs"
+                  onClick={() => void askAI()}
+                  disabled={!live || asking || !aiPrompt.trim()}
+                >
+                  {asking ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                  {asking ? 'Thinking…' : 'Generate SQL'}
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn h-6 w-6"
+                  onClick={onOpenAISettings}
+                  title="AI settings"
+                  aria-label="AI settings"
+                >
+                  <Settings2 size={12} />
+                </button>
               </div>
               <textarea
                 ref={editorRef}

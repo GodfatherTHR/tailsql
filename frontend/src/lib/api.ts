@@ -1,12 +1,20 @@
 import type {
+  AgentConfig,
+  AgentSafetyRequest,
+  AISettings,
   CreateInstanceRequest,
   FunnelState,
+  GenerateSQLResult,
   Instance,
   JavaCodegen,
   LogRequest,
+  MCPConfigRequest,
   ProxySnapshot,
   QueryResult,
+  RESTConfigRequest,
   SchemaSnapshot,
+  SeedRowsResult,
+  SnapshotInfo,
   SystemHealth,
   TableMutationResult,
   TableRowsResult,
@@ -61,6 +69,30 @@ interface DesktopBridge {
     key: Record<string, string | null>;
   }): Promise<TableMutationResult>;
   DropTable(request: { id: string; schema: string; table: string }): Promise<void>;
+  GetAgentConfig(): Promise<AgentConfig>;
+  SetMCPConfig(request: MCPConfigRequest): Promise<AgentConfig>;
+  SetRESTConfig(request: RESTConfigRequest): Promise<AgentConfig>;
+  SetAgentSafety(request: AgentSafetyRequest): Promise<AgentConfig>;
+  RegenerateAgentToken(request: { target: string }): Promise<AgentConfig>;
+  GetAISettings(): Promise<AISettings>;
+  SaveAISettings(settings: {
+    provider: string;
+    baseUrl: string;
+    model: string;
+    apiKey: string;
+    clearApiKey: boolean;
+  }): Promise<AISettings>;
+  ListSnapshots(id: string): Promise<SnapshotInfo[]>;
+  CreateSnapshot(request: { id: string; label: string }): Promise<SnapshotInfo>;
+  RestoreSnapshot(request: { id: string; snapshotId: string }): Promise<Instance>;
+  DeleteSnapshot(request: { id: string; snapshotId: string }): Promise<void>;
+  GenerateSQL(request: { id: string; prompt: string }): Promise<GenerateSQLResult>;
+  SeedTableRows(request: {
+    id: string;
+    schema: string;
+    table: string;
+    count: number;
+  }): Promise<SeedRowsResult>;
   GetFunnelState(id: string): Promise<FunnelState>;
   EnableFunnel(request: { id: string; port: number }): Promise<FunnelState>;
   DisableFunnel(id: string): Promise<FunnelState>;
@@ -134,6 +166,38 @@ export const api = {
     desktop().DeleteTableRow({ id, schema: table.schema, table: table.name, values: {}, key }),
   dropTable: (id: string, table: { schema: string; name: string }): Promise<void> =>
     desktop().DropTable({ id, schema: table.schema, table: table.name }),
+  getAgentConfig: (): Promise<AgentConfig> => desktop().GetAgentConfig(),
+  setMCPConfig: (request: MCPConfigRequest): Promise<AgentConfig> =>
+    desktop().SetMCPConfig(request),
+  setRESTConfig: (request: RESTConfigRequest): Promise<AgentConfig> =>
+    desktop().SetRESTConfig(request),
+  setAgentSafety: (request: AgentSafetyRequest): Promise<AgentConfig> =>
+    desktop().SetAgentSafety(request),
+  regenerateAgentToken: (target: 'mcp' | 'rest'): Promise<AgentConfig> =>
+    desktop().RegenerateAgentToken({ target }),
+  getAISettings: (): Promise<AISettings> => desktop().GetAISettings(),
+  saveAISettings: (settings: {
+    provider: string;
+    baseUrl: string;
+    model: string;
+    apiKey: string;
+    clearApiKey: boolean;
+  }): Promise<AISettings> => desktop().SaveAISettings(settings),
+  listSnapshots: (id: string): Promise<SnapshotInfo[]> => desktop().ListSnapshots(id),
+  createSnapshot: (id: string, label: string): Promise<SnapshotInfo> =>
+    desktop().CreateSnapshot({ id, label }),
+  restoreSnapshot: (id: string, snapshotId: string): Promise<Instance> =>
+    desktop().RestoreSnapshot({ id, snapshotId }),
+  deleteSnapshot: (id: string, snapshotId: string): Promise<void> =>
+    desktop().DeleteSnapshot({ id, snapshotId }),
+  generateSQL: (id: string, prompt: string): Promise<GenerateSQLResult> =>
+    desktop().GenerateSQL({ id, prompt }),
+  seedTableRows: (
+    id: string,
+    table: { schema: string; name: string },
+    count: number,
+  ): Promise<SeedRowsResult> =>
+    desktop().SeedTableRows({ id, schema: table.schema, table: table.name, count }),
   getFunnelState: (id: string): Promise<FunnelState> => desktop().GetFunnelState(id),
   enableFunnel: (id: string, port: number): Promise<FunnelState> =>
     desktop().EnableFunnel({ id, port }),

@@ -1,0 +1,281 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"tailsql/internal/config"
+	"tailsql/internal/dbmanager"
+	"tailsql/internal/mcp"
+	"tailsql/internal/restapi"
+	"tailsql/internal/snapshots"
+	"tailsql/internal/sqlrunner"
+)
+
+func freePort(t *testing.T) int {
+	t.Helper()
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("reserve port: %v", err)
+	}
+	defer listener.Close()
+	return listener.Addr().(*net.TCPAddr).Port
+}
+
+func TestAgentGatewaysIntegration(t *testing.T) {
+	if os.Getenv("TAILSQL_INTEGRATION") != "1" {
+		t.Skip("set TAILSQL_INTEGRATION=1 to run real-H2 MCP/REST tests")
+	}
+	assets, err := filepath.Abs("assets")
+	if err != nil {
+		t.Fatalf("resolve assets: %v", err)
+	}
+	dataDir := t.TempDir()
+	store, err := config.Open(filepath.Join(dataDir, "instances.json"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	manager, err := dbmanager.New(dbmanager.Config{
+		Store:     store,
+		DataDir:   dataDir,
+		AssetsDir: assets,
+	})
+	if err != nil {
+		t.Fatalf("create manager: %v", err)
+	}
+	if !manager.Java().Supported || !manager.H2().Available {
+		t.Skipf("Java/H2 unavailable: %s %s", manager.Java().Error, manager.H2().Error)
+	}
+	instance, err := manager.Create(dbmanager.CreateInput{
+		Name: "agentdb", Username: "sa", Password: "Secret99pw",
+	})
+	if err != nil {
+		t.Fatalf("create database: %v", err)
+	}
+	if _, err := manager.Start(instance.ID); err != nil {
+		t.Fatalf("start database: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		_, _ = manager.Stop(instance.ID)
+		manager.StopAll(ctx)
+	}()
+
+	prefs, err := config.OpenPreferences(filepath.Join(dataDir, "config.json"))
+	if err != nil {
+		t.Fatalf("open preferences: %v", err)
+	}
+	// Force the deterministic seeder fallback by pointing Ollama at a closed port.
+	initial := prefs.Get()
+	initial.AIBaseURL = "http://127.0.0.1:1"
+	if err := prefs.Update(initial); err != nil {
+		t.Fatalf("update preferences: %v", err)
+	}
+	snapshotStore, err := snapshots.New(filepath.Join(dataDir, "snapshots"))
+	if err != nil {
+		t.Fatalf("open snapshots: %v", err)
+	}
+	app := &App{
+		version:   "0.3.0",
+		store:     store,
+		manager:   manager,
+		prefs:     prefs,
+		snapshots: snapshotStore,
+	}
+	app.shuttingDown.Store(true)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	runner := sqlrunner.New(manager, manager.Bridge())
+	if _, err := runner.Execute(ctx, instance.ID,
+		"CREATE TABLE PUBLIC.AGENT_ITEMS(ID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(60) NOT NULL)"); err != nil {
+		t.Fatalf("create table: %v", err)
+	}
+	if _, err := runner.Execute(ctx, instance.ID,
+		"INSERT INTO PUBLIC.AGENT_ITEMS(NAME) VALUES ('alpha')"); err != nil {
+		t.Fatalf("insert row: %v", err)
+	}
+
+	current := prefs.Get()
+	mcpPort := freePort(t)
+	restPort := freePort(t)
+	mcpServer := mcp.New(mcp.Config{
+		BindAddress: "127.0.0.1",
+		Port:        mcpPort,
+		Token:       current.MCPToken,
+		Version:     "0.3.0",
+	}, newMCPBackend(app))
+	restServer := restapi.New(restapi.Config{
+		BindAddress: "127.0.0.1",
+		Port:        restPort,
+		APIKey:      current.RESTAPIKey,
+		RequireAuth: true,
+		Version:     "0.3.0",
+	}, newRESTBackend(app))
+	app.mcp = mcpServer
+	app.rest = restServer
+	if err := mcpServer.Start(); err != nil {
+		t.Fatalf("start MCP: %v", err)
+	}
+	defer mcpServer.Stop()
+	if err := restServer.Start(); err != nil {
+		t.Fatalf("start REST: %v", err)
+	}
+	defer restServer.Stop()
+
+	// MCP: initialize, list databases, inspect schema, read rows.
+	initialize := postMCP(t, mcpPort, current.MCPToken,
+		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}`)
+	if !strings.Contains(initialize, "tailsql") {
+		t.Fatalf("unexpected initialize response: %s", initialize)
+	}
+	list := postMCP(t, mcpPort, current.MCPToken,
+		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_databases","arguments":{}}}`)
+	if !strings.Contains(list, "agentdb") || !strings.Contains(list, "jdbc:h2:tcp://127.0.0.1") {
+		t.Fatalf("list_databases did not expose the instance: %s", list)
+	}
+	schema := postMCP(t, mcpPort, current.MCPToken,
+		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"inspect_schema","arguments":{"database_name":"agentdb"}}}`)
+	if !strings.Contains(schema, "AGENT_ITEMS") {
+		t.Fatalf("inspect_schema missing table: %s", schema)
+	}
+	read := postMCP(t, mcpPort, current.MCPToken,
+		`{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"read_query","arguments":{"database_name":"agentdb","sql":"SELECT NAME FROM PUBLIC.AGENT_ITEMS"}}}`)
+	if !strings.Contains(read, "alpha") {
+		t.Fatalf("read_query did not return the row: %s", read)
+	}
+	bundle := postMCP(t, mcpPort, current.MCPToken,
+		`{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"get_connection_bundle","arguments":{"database_name":"agentdb"}}}`)
+	if !strings.Contains(bundle, "hikariCp") || !strings.Contains(bundle, "restApiKey") {
+		t.Fatalf("connection bundle is incomplete: %s", bundle)
+	}
+
+	// REST: authenticated list, insert, list again, OpenAPI.
+	restURL := "http://127.0.0.1:" + strconv.Itoa(restPort) + "/api/v1/agentdb"
+	body := restCall(t, http.MethodGet, restURL+"/PUBLIC/AGENT_ITEMS?limit=10", current.RESTAPIKey, "")
+	if !strings.Contains(body, "alpha") {
+		t.Fatalf("REST list did not return the row: %s", body)
+	}
+	insertBody := restCall(t, http.MethodPost, restURL+"/PUBLIC/AGENT_ITEMS", current.RESTAPIKey,
+		`{"NAME":"beta"}`)
+	if !strings.Contains(insertBody, `"inserted":1`) {
+		t.Fatalf("REST insert failed: %s", insertBody)
+	}
+	openapi := restCall(t, http.MethodGet, restURL+"/openapi.json", current.RESTAPIKey, "")
+	if !strings.Contains(openapi, "3.0.3") || !strings.Contains(openapi, "AGENT_ITEMS") {
+		t.Fatalf("REST OpenAPI is incomplete: %s", openapi)
+	}
+	unauthorized := restCallStatus(t, http.MethodGet, restURL+"/PUBLIC/AGENT_ITEMS", "", "")
+	if unauthorized != http.StatusUnauthorized {
+		t.Fatalf("expected 401 without the API key, got %d", unauthorized)
+	}
+
+	// Seeder: offline fallback inserts type-aware rows directly.
+	seed, err := app.SeedTableRows(SeedRowsRequest{
+		ID: instance.ID, Schema: "PUBLIC", Table: "AGENT_ITEMS", Count: 10,
+	})
+	if err != nil {
+		t.Fatalf("seed rows: %v", err)
+	}
+	if seed.Inserted != 10 || !strings.Contains(seed.GeneratedBy, "fallback") {
+		t.Fatalf("unexpected seed result: %+v", seed)
+	}
+	countResult, err := runner.Execute(ctx, instance.ID, "SELECT COUNT(*) FROM PUBLIC.AGENT_ITEMS")
+	if err != nil || len(countResult.Rows) != 1 || countResult.Rows[0][0] == nil ||
+		*countResult.Rows[0][0] != "12" {
+		t.Fatalf("unexpected row count after seeding: %+v %v", countResult.Rows, err)
+	}
+
+	// Checkpoints: create and list a real online snapshot.
+	snapshot, err := app.CreateSnapshot(SnapshotRequest{ID: instance.ID, Label: "Integration checkpoint"})
+	if err != nil {
+		t.Fatalf("create snapshot: %v", err)
+	}
+	if snapshot.SizeBytes <= 0 {
+		t.Fatalf("snapshot is empty: %+v", snapshot)
+	}
+	listSnapshots, err := app.ListSnapshots(instance.ID)
+	if err != nil || len(listSnapshots) == 0 {
+		t.Fatalf("list snapshots: %v %+v", err, listSnapshots)
+	}
+}
+
+func postMCP(t *testing.T, port int, token, body string) string {
+	t.Helper()
+	request, err := http.NewRequest(http.MethodPost,
+		"http://127.0.0.1:"+strconv.Itoa(port)+"/mcp", bytes.NewReader([]byte(body)))
+	if err != nil {
+		t.Fatalf("build MCP request: %v", err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+token)
+	client := &http.Client{Timeout: 60 * time.Second}
+	response, err := client.Do(request)
+	if err != nil {
+		t.Fatalf("MCP request: %v", err)
+	}
+	defer response.Body.Close()
+	var payload bytes.Buffer
+	if _, err := payload.ReadFrom(response.Body); err != nil {
+		t.Fatalf("read MCP response: %v", err)
+	}
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("MCP status %d: %s", response.StatusCode, payload.String())
+	}
+	return payload.String()
+}
+
+func restCall(t *testing.T, method, url, key, body string) string {
+	t.Helper()
+	request, err := http.NewRequest(method, url, strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("build REST request: %v", err)
+	}
+	if key != "" {
+		request.Header.Set("X-TailSQL-Key", key)
+	}
+	if body != "" {
+		request.Header.Set("Content-Type", "application/json")
+	}
+	client := &http.Client{Timeout: 60 * time.Second}
+	response, err := client.Do(request)
+	if err != nil {
+		t.Fatalf("REST request: %v", err)
+	}
+	defer response.Body.Close()
+	var payload bytes.Buffer
+	if _, err := payload.ReadFrom(response.Body); err != nil {
+		t.Fatalf("read REST response: %v", err)
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		t.Fatalf("REST status %d: %s", response.StatusCode, payload.String())
+	}
+	return payload.String()
+}
+
+func restCallStatus(t *testing.T, method, url, key, body string) int {
+	t.Helper()
+	request, err := http.NewRequest(method, url, strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("build REST request: %v", err)
+	}
+	if key != "" {
+		request.Header.Set("X-TailSQL-Key", key)
+	}
+	client := &http.Client{Timeout: 30 * time.Second}
+	response, err := client.Do(request)
+	if err != nil {
+		t.Fatalf("REST request: %v", err)
+	}
+	defer response.Body.Close()
+	return response.StatusCode
+}

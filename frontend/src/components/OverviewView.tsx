@@ -6,6 +6,7 @@ import {
   Eye,
   EyeOff,
   HardDrive,
+  History,
   KeyRound,
   Loader2,
   Lock,
@@ -24,9 +25,12 @@ import {
   formatUptime,
   statusLabel,
 } from '../lib/format';
+import type { ToastKind } from '../hooks/useToasts';
+import { CheckpointsDrawer } from './CheckpointsDrawer';
 import { CopyButton } from './CopyButton';
 import { EndpointRow } from './EndpointRow';
 import { FunnelCard } from './FunnelCard';
+import { RestApiCard } from './RestApiCard';
 import { ServerLogPanel } from './ServerLogPanel';
 import { StatusBadge } from './StatusBadge';
 import { TailscaleCard } from './TailscaleCard';
@@ -51,6 +55,7 @@ interface OverviewViewProps {
   onRefreshTailscale: () => void;
   onOpenJava: () => void;
   onCopyError: (message: string) => void;
+  onToast: (kind: ToastKind, message: string) => void;
 }
 
 export function OverviewView({
@@ -73,9 +78,11 @@ export function OverviewView({
   onRefreshTailscale,
   onOpenJava,
   onCopyError,
+  onToast,
 }: OverviewViewProps) {
   const [now, setNow] = useState(Date.now());
   const [revealPassword, setRevealPassword] = useState(false);
+  const [checkpointsOpen, setCheckpointsOpen] = useState(false);
   const running = instance.status === 'running';
   const transient = instance.status === 'starting' || instance.status === 'stopping';
   const actionsDisabled = Boolean(busy) || transient;
@@ -149,6 +156,15 @@ export function OverviewView({
               {instance.status === 'starting' ? 'Starting…' : 'Start'}
             </button>
           )}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setCheckpointsOpen(true)}
+            disabled={actionsDisabled}
+          >
+            <History size={14} />
+            Checkpoints
+          </button>
           <button type="button" className="btn-primary" onClick={onOpenJava}>
             <Code2 size={14} />
             Connect to Java
@@ -229,6 +245,8 @@ export function OverviewView({
         onRefresh={onRefreshFunnel}
         onCopyError={onCopyError}
       />
+
+      <RestApiCard onToast={onToast} />
 
       <div className="grid gap-5 xl:grid-cols-2">
         <div className="card overflow-hidden">
@@ -331,6 +349,13 @@ export function OverviewView({
           <ServerLogPanel instance={instance} />
         </div>
       </div>
+
+      <CheckpointsDrawer
+        open={checkpointsOpen}
+        instance={instance}
+        onClose={() => setCheckpointsOpen(false)}
+        onToast={onToast}
+      />
     </div>
   );
 }

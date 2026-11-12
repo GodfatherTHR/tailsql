@@ -127,6 +127,7 @@ export namespace jdbc {
 	    default: string;
 	    autoIncrement: boolean;
 	    generated: boolean;
+	    remarks: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ColumnInfo(source);
@@ -142,14 +143,58 @@ export namespace jdbc {
 	        this.default = source["default"];
 	        this.autoIncrement = source["autoIncrement"];
 	        this.generated = source["generated"];
+	        this.remarks = source["remarks"];
+	    }
+	}
+	export class ForeignKeyInfo {
+	    name: string;
+	    column: string;
+	    referencedSchema: string;
+	    referencedTable: string;
+	    referencedColumn: string;
+	    onUpdate: string;
+	    onDelete: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ForeignKeyInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.column = source["column"];
+	        this.referencedSchema = source["referencedSchema"];
+	        this.referencedTable = source["referencedTable"];
+	        this.referencedColumn = source["referencedColumn"];
+	        this.onUpdate = source["onUpdate"];
+	        this.onDelete = source["onDelete"];
+	    }
+	}
+	export class IndexInfo {
+	    name: string;
+	    unique: boolean;
+	    columns: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new IndexInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.unique = source["unique"];
+	        this.columns = source["columns"];
 	    }
 	}
 	export class TableInfo {
 	    schema: string;
 	    name: string;
 	    type: string;
+	    remarks: string;
 	    primaryKey: string[];
 	    columns: ColumnInfo[];
+	    foreignKeys: ForeignKeyInfo[];
+	    indexes: IndexInfo[];
 	
 	    static createFrom(source: any = {}) {
 	        return new TableInfo(source);
@@ -160,8 +205,11 @@ export namespace jdbc {
 	        this.schema = source["schema"];
 	        this.name = source["name"];
 	        this.type = source["type"];
+	        this.remarks = source["remarks"];
 	        this.primaryKey = source["primaryKey"];
 	        this.columns = this.convertValues(source["columns"], ColumnInfo);
+	        this.foreignKeys = this.convertValues(source["foreignKeys"], ForeignKeyInfo);
+	        this.indexes = this.convertValues(source["indexes"], IndexInfo);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -217,6 +265,181 @@ export namespace jdbc {
 
 export namespace main {
 	
+	export class AIProviderSettings {
+	    provider: string;
+	    baseUrl: string;
+	    model: string;
+	    apiKey: string;
+	    clearApiKey: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AIProviderSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.provider = source["provider"];
+	        this.baseUrl = source["baseUrl"];
+	        this.model = source["model"];
+	        this.apiKey = source["apiKey"];
+	        this.clearApiKey = source["clearApiKey"];
+	    }
+	}
+	export class AISettingsView {
+	    provider: string;
+	    baseUrl: string;
+	    model: string;
+	    hasApiKey: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AISettingsView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.provider = source["provider"];
+	        this.baseUrl = source["baseUrl"];
+	        this.model = source["model"];
+	        this.hasApiKey = source["hasApiKey"];
+	    }
+	}
+	export class AgentSafetyView {
+	    readOnly: boolean;
+	    autoSnapshotOnAgentDdl: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AgentSafetyView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.readOnly = source["readOnly"];
+	        this.autoSnapshotOnAgentDdl = source["autoSnapshotOnAgentDdl"];
+	    }
+	}
+	export class RESTStateView {
+	    running: boolean;
+	    enabled: boolean;
+	    port: number;
+	    bindAddress: string;
+	    baseUrl: string;
+	    localUrl: string;
+	    publicBaseUrl: string;
+	    apiKey: string;
+	    tailscaleEnabled: boolean;
+	    funnelEnabled: boolean;
+	    funnelPort: number;
+	    allowPublicRead: boolean;
+	    databaseCount: number;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RESTStateView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = source["running"];
+	        this.enabled = source["enabled"];
+	        this.port = source["port"];
+	        this.bindAddress = source["bindAddress"];
+	        this.baseUrl = source["baseUrl"];
+	        this.localUrl = source["localUrl"];
+	        this.publicBaseUrl = source["publicBaseUrl"];
+	        this.apiKey = source["apiKey"];
+	        this.tailscaleEnabled = source["tailscaleEnabled"];
+	        this.funnelEnabled = source["funnelEnabled"];
+	        this.funnelPort = source["funnelPort"];
+	        this.allowPublicRead = source["allowPublicRead"];
+	        this.databaseCount = source["databaseCount"];
+	        this.error = source["error"];
+	    }
+	}
+	export class MCPStateView {
+	    running: boolean;
+	    enabled: boolean;
+	    port: number;
+	    bindAddress: string;
+	    endpoint: string;
+	    token: string;
+	    tailscaleEnabled: boolean;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPStateView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = source["running"];
+	        this.enabled = source["enabled"];
+	        this.port = source["port"];
+	        this.bindAddress = source["bindAddress"];
+	        this.endpoint = source["endpoint"];
+	        this.token = source["token"];
+	        this.tailscaleEnabled = source["tailscaleEnabled"];
+	        this.error = source["error"];
+	    }
+	}
+	export class AgentConfigView {
+	    mcp: MCPStateView;
+	    rest: RESTStateView;
+	    safety: AgentSafetyView;
+	    ai: AISettingsView;
+	    snippets: Record<string, string>;
+	    systemPrompt: string;
+	    tailscaleIp: string;
+	    tailscaleAvailable: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AgentConfigView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mcp = this.convertValues(source["mcp"], MCPStateView);
+	        this.rest = this.convertValues(source["rest"], RESTStateView);
+	        this.safety = this.convertValues(source["safety"], AgentSafetyView);
+	        this.ai = this.convertValues(source["ai"], AISettingsView);
+	        this.snippets = source["snippets"];
+	        this.systemPrompt = source["systemPrompt"];
+	        this.tailscaleIp = source["tailscaleIp"];
+	        this.tailscaleAvailable = source["tailscaleAvailable"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AgentSafetyRequest {
+	    readOnly: boolean;
+	    autoSnapshotOnAgentDdl: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AgentSafetyRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.readOnly = source["readOnly"];
+	        this.autoSnapshotOnAgentDdl = source["autoSnapshotOnAgentDdl"];
+	    }
+	}
+	
 	export class CreateInstanceRequest {
 	    name: string;
 	    username: string;
@@ -247,6 +470,36 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.port = source["port"];
+	    }
+	}
+	export class GenerateSQLRequest {
+	    id: string;
+	    prompt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GenerateSQLRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.prompt = source["prompt"];
+	    }
+	}
+	export class GenerateSQLResult {
+	    sql: string;
+	    provider: string;
+	    model: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GenerateSQLResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sql = source["sql"];
+	        this.provider = source["provider"];
+	        this.model = source["model"];
 	    }
 	}
 	export class InstanceView {
@@ -335,6 +588,23 @@ export namespace main {
 	        this.lines = source["lines"];
 	    }
 	}
+	export class MCPConfigRequest {
+	    enabled: boolean;
+	    port: number;
+	    tailscaleEnabled: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPConfigRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.port = source["port"];
+	        this.tailscaleEnabled = source["tailscaleEnabled"];
+	    }
+	}
+	
 	export class QueryRequest {
 	    id: string;
 	    sql: string;
@@ -394,6 +664,95 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	export class RESTConfigRequest {
+	    enabled: boolean;
+	    port: number;
+	    tailscaleEnabled: boolean;
+	    funnelEnabled: boolean;
+	    funnelPort: number;
+	    allowPublicRead: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RESTConfigRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.port = source["port"];
+	        this.tailscaleEnabled = source["tailscaleEnabled"];
+	        this.funnelEnabled = source["funnelEnabled"];
+	        this.funnelPort = source["funnelPort"];
+	        this.allowPublicRead = source["allowPublicRead"];
+	    }
+	}
+	
+	export class SeedRowsRequest {
+	    id: string;
+	    schema: string;
+	    table: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SeedRowsRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.schema = source["schema"];
+	        this.table = source["table"];
+	        this.count = source["count"];
+	    }
+	}
+	export class SeedRowsResult {
+	    inserted: number;
+	    generatedBy: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SeedRowsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.inserted = source["inserted"];
+	        this.generatedBy = source["generatedBy"];
+	    }
+	}
+	export class SnapshotRequest {
+	    id: string;
+	    snapshotId: string;
+	    label: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SnapshotRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.snapshotId = source["snapshotId"];
+	        this.label = source["label"];
+	    }
+	}
+	export class SnapshotView {
+	    id: string;
+	    label: string;
+	    sizeBytes: number;
+	    createdAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SnapshotView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.sizeBytes = source["sizeBytes"];
+	        this.createdAt = source["createdAt"];
+	    }
 	}
 	export class SystemHealth {
 	    appVersion: string;
@@ -560,6 +919,18 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	export class TokenRotateRequest {
+	    target: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TokenRotateRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.target = source["target"];
+	    }
 	}
 
 }

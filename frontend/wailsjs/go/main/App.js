@@ -6,8 +6,16 @@ export function CreateInstance(arg1) {
   return window['go']['main']['App']['CreateInstance'](arg1);
 }
 
+export function CreateSnapshot(arg1) {
+  return window['go']['main']['App']['CreateSnapshot'](arg1);
+}
+
 export function DeleteInstance(arg1) {
   return window['go']['main']['App']['DeleteInstance'](arg1);
+}
+
+export function DeleteSnapshot(arg1) {
+  return window['go']['main']['App']['DeleteSnapshot'](arg1);
 }
 
 export function DeleteTableRow(arg1) {
@@ -36,6 +44,18 @@ export function EnableTailscaleHosting(arg1) {
 
 export function ExecuteQuery(arg1) {
   return window['go']['main']['App']['ExecuteQuery'](arg1);
+}
+
+export function GenerateSQL(arg1) {
+  return window['go']['main']['App']['GenerateSQL'](arg1);
+}
+
+export function GetAISettings() {
+  return window['go']['main']['App']['GetAISettings']();
+}
+
+export function GetAgentConfig() {
+  return window['go']['main']['App']['GetAgentConfig']();
 }
 
 export function GetFunnelState(arg1) {
@@ -74,6 +94,10 @@ export function ListInstances() {
   return window['go']['main']['App']['ListInstances']();
 }
 
+export function ListSnapshots(arg1) {
+  return window['go']['main']['App']['ListSnapshots'](arg1);
+}
+
 export function ListTables(arg1) {
   return window['go']['main']['App']['ListTables'](arg1);
 }
@@ -86,8 +110,36 @@ export function RefreshTailscale() {
   return window['go']['main']['App']['RefreshTailscale']();
 }
 
+export function RegenerateAgentToken(arg1) {
+  return window['go']['main']['App']['RegenerateAgentToken'](arg1);
+}
+
 export function RestartInstance(arg1) {
   return window['go']['main']['App']['RestartInstance'](arg1);
+}
+
+export function RestoreSnapshot(arg1) {
+  return window['go']['main']['App']['RestoreSnapshot'](arg1);
+}
+
+export function SaveAISettings(arg1) {
+  return window['go']['main']['App']['SaveAISettings'](arg1);
+}
+
+export function SeedTableRows(arg1) {
+  return window['go']['main']['App']['SeedTableRows'](arg1);
+}
+
+export function SetAgentSafety(arg1) {
+  return window['go']['main']['App']['SetAgentSafety'](arg1);
+}
+
+export function SetMCPConfig(arg1) {
+  return window['go']['main']['App']['SetMCPConfig'](arg1);
+}
+
+export function SetRESTConfig(arg1) {
+  return window['go']['main']['App']['SetRESTConfig'](arg1);
 }
 
 export function StartInstance(arg1) {

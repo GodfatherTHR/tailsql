@@ -308,6 +308,21 @@ func (m *Manager) ConnectionInfo(id string) (string, string, string, error) {
 	return LocalJDBCURL(instance.Name, instance.Port), instance.Username, instance.Password, nil
 }
 
+// DatabasePath returns the absolute .mv.db path for an instance.
+func (m *Manager) DatabasePath(id string) (string, error) {
+	instance, ok := m.getStored(id)
+	if !ok {
+		return "", fmt.Errorf("database instance %q was not found", id)
+	}
+	return filepath.Join(m.dbDir, instance.DatabaseFile), nil
+}
+
+func (m *Manager) getStored(id string) (config.Instance, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.store.Get(id)
+}
+
 // SetTailscaleState records the outcome of enabling/disabling the proxy.
 func (m *Manager) SetTailscaleState(id string, enabled bool, ip string, port int) (config.Instance, error) {
 	m.mu.Lock()

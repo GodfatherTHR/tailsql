@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Bot,
   Code2,
   Database,
   Globe2,
@@ -26,6 +27,8 @@ import { api, errorMessage } from './lib/api';
 import { formatBytes } from './lib/format';
 import { EventsOff, EventsOn } from '../wailsjs/runtime/runtime';
 import { useToasts } from './hooks/useToasts';
+import { AgentConnectView } from './components/AgentConnectView';
+import { AISettingsModal } from './components/AISettingsModal';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { CreateDatabaseModal } from './components/CreateDatabaseModal';
 import { EmptyState } from './components/EmptyState';
@@ -43,6 +46,7 @@ const navItems = [
   { key: 'table', label: 'Table Editor', icon: Table2 },
   { key: 'java', label: 'Connect to Java', icon: Code2 },
   { key: 'sql', label: 'SQL Workbench', icon: Terminal },
+  { key: 'ai', label: 'Connect to AI', icon: Bot },
 ] as const;
 
 export default function App() {
@@ -67,6 +71,7 @@ export default function App() {
   const [createError, setCreateError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Instance | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
 
   const [refreshingTailscale, setRefreshingTailscale] = useState(false);
   const [refreshingHealth, setRefreshingHealth] = useState(false);
@@ -626,6 +631,7 @@ export default function App() {
                   onRefreshTailscale={() => void handleRefreshTailscale()}
                   onOpenJava={() => setView('java')}
                   onCopyError={handleCopyError}
+                  onToast={push}
                 />
               ) : view === 'table' ? (
                 <TableEditorView
@@ -643,13 +649,20 @@ export default function App() {
                   onOpenOverview={() => setView('overview')}
                   onToast={push}
                 />
-              ) : (
+              ) : view === 'sql' ? (
                 <SqlWorkbenchView
                   instance={selectedInstance}
                   busy={busy}
                   onStart={handleStart}
                   onOpenTable={openTableEditor}
                   realtimeEvent={realtimeEvent}
+                  onOpenAISettings={() => setAiSettingsOpen(true)}
+                />
+              ) : (
+                <AgentConnectView
+                  instance={selectedInstance}
+                  onOpenAISettings={() => setAiSettingsOpen(true)}
+                  onToast={push}
                 />
               )}
             </div>
@@ -691,6 +704,13 @@ export default function App() {
             setDeleteTarget(null);
           }
         }}
+      />
+
+      <AISettingsModal
+        open={aiSettingsOpen}
+        onClose={() => setAiSettingsOpen(false)}
+        onSaved={() => undefined}
+        onToast={push}
       />
 
       <ToastViewport toasts={toasts} onDismiss={dismiss} />

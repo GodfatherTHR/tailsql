@@ -7,7 +7,11 @@ import {jdbc} from '../models';
 
 export function CreateInstance(arg1:main.CreateInstanceRequest):Promise<main.InstanceView>;
 
+export function CreateSnapshot(arg1:main.SnapshotRequest):Promise<main.SnapshotView>;
+
 export function DeleteInstance(arg1:string):Promise<void>;
+
+export function DeleteSnapshot(arg1:main.SnapshotRequest):Promise<void>;
 
 export function DeleteTableRow(arg1:main.TableMutationRequest):Promise<main.TableMutationResult>;
 
@@ -22,6 +26,12 @@ export function EnableFunnel(arg1:main.FunnelRequest):Promise<tailscale.FunnelSt
 export function EnableTailscaleHosting(arg1:string):Promise<tailscale.Snapshot>;
 
 export function ExecuteQuery(arg1:main.QueryRequest):Promise<main.QueryResult>;
+
+export function GenerateSQL(arg1:main.GenerateSQLRequest):Promise<main.GenerateSQLResult>;
+
+export function GetAISettings():Promise<main.AISettingsView>;
+
+export function GetAgentConfig():Promise<main.AgentConfigView>;
 
 export function GetFunnelState(arg1:string):Promise<tailscale.FunnelState>;
 
@@ -41,13 +51,29 @@ export function InstallH2Engine():Promise<main.SystemHealth>;
 
 export function ListInstances():Promise<Array<main.InstanceView>>;
 
+export function ListSnapshots(arg1:string):Promise<Array<main.SnapshotView>>;
+
 export function ListTables(arg1:string):Promise<jdbc.SchemaSnapshot>;
 
 export function RefreshSystemHealth():Promise<main.SystemHealth>;
 
 export function RefreshTailscale():Promise<tailscale.Status>;
 
+export function RegenerateAgentToken(arg1:main.TokenRotateRequest):Promise<main.AgentConfigView>;
+
 export function RestartInstance(arg1:string):Promise<main.InstanceView>;
+
+export function RestoreSnapshot(arg1:main.SnapshotRequest):Promise<main.InstanceView>;
+
+export function SaveAISettings(arg1:main.AIProviderSettings):Promise<main.AISettingsView>;
+
+export function SeedTableRows(arg1:main.SeedRowsRequest):Promise<main.SeedRowsResult>;
+
+export function SetAgentSafety(arg1:main.AgentSafetyRequest):Promise<main.AgentConfigView>;
+
+export function SetMCPConfig(arg1:main.MCPConfigRequest):Promise<main.AgentConfigView>;
+
+export function SetRESTConfig(arg1:main.RESTConfigRequest):Promise<main.AgentConfigView>;
 
 export function StartInstance(arg1:string):Promise<main.InstanceView>;
 

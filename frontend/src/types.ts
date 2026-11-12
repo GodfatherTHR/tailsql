@@ -1,6 +1,6 @@
 export type InstanceStatus = 'stopped' | 'starting' | 'running' | 'stopping' | 'error';
 export type JavaMode = 'local' | 'tailscale';
-export type ViewKey = 'overview' | 'table' | 'java' | 'sql';
+export type ViewKey = 'overview' | 'table' | 'java' | 'sql' | 'ai';
 export type CodeLanguage = 'java' | 'xml' | 'properties' | 'yaml' | 'groovy' | 'sql' | 'text';
 
 export interface JavaInfo {
@@ -208,4 +208,93 @@ export interface RealtimeChangeEvent {
 export interface LogRequest {
   id: string;
   lines: number;
+}
+
+export interface MCPState {
+  running: boolean;
+  enabled: boolean;
+  port: number;
+  bindAddress: string;
+  endpoint: string;
+  token: string;
+  tailscaleEnabled: boolean;
+  error: string;
+}
+
+export interface RESTState {
+  running: boolean;
+  enabled: boolean;
+  port: number;
+  bindAddress: string;
+  baseUrl: string;
+  localUrl: string;
+  publicBaseUrl: string;
+  apiKey: string;
+  tailscaleEnabled: boolean;
+  funnelEnabled: boolean;
+  funnelPort: number;
+  allowPublicRead: boolean;
+  databaseCount: number;
+  error: string;
+}
+
+export interface AgentSafety {
+  readOnly: boolean;
+  autoSnapshotOnAgentDdl: boolean;
+}
+
+export interface AISettings {
+  provider: string;
+  baseUrl: string;
+  model: string;
+  hasApiKey: boolean;
+}
+
+export interface AgentConfig {
+  mcp: MCPState;
+  rest: RESTState;
+  safety: AgentSafety;
+  ai: AISettings;
+  snippets: Record<string, string>;
+  systemPrompt: string;
+  tailscaleIp: string;
+  tailscaleAvailable: boolean;
+}
+
+export interface MCPConfigRequest {
+  enabled: boolean;
+  port: number;
+  tailscaleEnabled: boolean;
+}
+
+export interface RESTConfigRequest {
+  enabled: boolean;
+  port: number;
+  tailscaleEnabled: boolean;
+  funnelEnabled: boolean;
+  funnelPort: number;
+  allowPublicRead: boolean;
+}
+
+export interface AgentSafetyRequest {
+  readOnly: boolean;
+  autoSnapshotOnAgentDdl: boolean;
+}
+
+export interface SnapshotInfo {
+  id: string;
+  label: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface GenerateSQLResult {
+  sql: string;
+  provider: string;
+  model: string;
+}
+
+export interface SeedRowsResult {
+  inserted: number;
+  generatedBy: string;
 }

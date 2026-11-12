@@ -13,11 +13,14 @@ import (
 
 	"tailsql/internal/config"
 	"tailsql/internal/dbmanager"
+	"tailsql/internal/mcp"
+	"tailsql/internal/restapi"
+	"tailsql/internal/snapshots"
 	"tailsql/internal/tailscale"
 )
 
 const (
-	appVersion     = "0.2.1"
+	appVersion     = "0.3.0"
 	tailscaleCheck = 8 * time.Second
 )
 
@@ -28,14 +31,22 @@ type App struct {
 	mu             sync.RWMutex
 	ctx            context.Context
 	store          *config.Store
+	prefs          *config.PreferencesStore
 	manager        *dbmanager.Manager
 	hosts          *tailscale.HostManager
+	snapshots      *snapshots.Store
+	mcp            *mcp.Server
+	rest           *restapi.Server
 	health         SystemHealth
 	initErr        error
 	shuttingDown   atomic.Bool
 	realtimeCancel context.CancelFunc
 	realtimeStamps map[string]databaseStamp
 	realtimeEcho   map[string]time.Time
+
+	restFunnelActive bool
+	restFunnelPort   int
+	restFunnelError  string
 }
 
 // NewApp builds the application facade; initialization happens in startup.
@@ -140,13 +151,33 @@ func (a *App) startup(ctx context.Context) {
 
 	go a.reconcileFunnels()
 
+	prefs, prefsErr := config.OpenPreferences(filepath.Join(dataDir, "config.json"))
+	if prefsErr != nil {
+		a.recordInitError(prefsErr)
+		return
+	}
+	snapshotStore, snapshotErr := snapshots.New(filepath.Join(dataDir, "snapshots"))
+	if snapshotErr != nil {
+		a.recordInitError(snapshotErr)
+		return
+	}
+	a.mu.Lock()
+	a.prefs = prefs
+	a.snapshots = snapshotStore
+	a.mcp = mcp.New(mcp.Config{Version: a.version}, newMCPBackend(a))
+	a.rest = restapi.New(restapi.Config{Version: a.version}, newRESTBackend(a))
+	a.mu.Unlock()
+	a.applyAgentServers()
+
 	a.emit("instances:changed", a.instanceViews(manager.List()))
 	a.emit("tailscale:status", tailscaleStatus)
+	a.emitAgentState()
 }
 
 func (a *App) shutdown(_ context.Context) {
 	a.shuttingDown.Store(true)
 	a.stopRealtimeWatcher()
+	a.stopAgentServers()
 	a.mu.RLock()
 	hosts := a.hosts
 	manager := a.manager

@@ -46,8 +46,13 @@ try {
     $versionedExe = Join-Path $root "build/bin/TailSQL-$version.exe"
     Copy-Item -Path (Join-Path $root "build/bin/TailSQL.exe") -Destination $versionedExe -Force
 
+    $mcpBridge = Join-Path $root "build/bin/tailsql-mcp.exe"
+    & go build -o $mcpBridge ./cmd/tailsql-mcp
+    if ($LASTEXITCODE -ne 0) { throw "tailsql-mcp build failed" }
+
     Write-Host "Build complete: $root/build/bin/TailSQL.exe"
     Write-Host "Versioned executable: $versionedExe"
+    Write-Host "MCP stdio bridge: $mcpBridge"
     Write-Host "H2 asset copied next to the executable."
 }
 finally {

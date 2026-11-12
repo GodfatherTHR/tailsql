@@ -7,12 +7,14 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"tailsql/internal/executil"
@@ -46,11 +48,32 @@ type SchemaSnapshot struct {
 
 // TableInfo describes one table or view.
 type TableInfo struct {
-	Schema     string       `json:"schema"`
-	Name       string       `json:"name"`
-	Type       string       `json:"type"`
-	PrimaryKey []string     `json:"primaryKey"`
-	Columns    []ColumnInfo `json:"columns"`
+	Schema      string           `json:"schema"`
+	Name        string           `json:"name"`
+	Type        string           `json:"type"`
+	Remarks     string           `json:"remarks"`
+	PrimaryKey  []string         `json:"primaryKey"`
+	Columns     []ColumnInfo     `json:"columns"`
+	ForeignKeys []ForeignKeyInfo `json:"foreignKeys"`
+	Indexes     []IndexInfo      `json:"indexes"`
+}
+
+// ForeignKeyInfo describes one imported foreign key.
+type ForeignKeyInfo struct {
+	Name             string `json:"name"`
+	Column           string `json:"column"`
+	ReferencedSchema string `json:"referencedSchema"`
+	ReferencedTable  string `json:"referencedTable"`
+	ReferencedColumn string `json:"referencedColumn"`
+	OnUpdate         string `json:"onUpdate"`
+	OnDelete         string `json:"onDelete"`
+}
+
+// IndexInfo describes one index on a table.
+type IndexInfo struct {
+	Name    string   `json:"name"`
+	Unique  bool     `json:"unique"`
+	Columns []string `json:"columns"`
 }
 
 // ColumnInfo describes one table column.
@@ -63,6 +86,7 @@ type ColumnInfo struct {
 	Default       string `json:"default"`
 	AutoIncrement bool   `json:"autoIncrement"`
 	Generated     bool   `json:"generated"`
+	Remarks       string `json:"remarks"`
 }
 
 // BridgeError represents a SQL or connection failure reported by the Java side.
@@ -158,6 +182,20 @@ func (b *Bridge) Execute(ctx context.Context, url, username, password, sql strin
 	if err != nil {
 		return ExecResult{}, err
 	}
+	return execResultFrom(response), nil
+}
+
+// Query runs one prepared statement. Parameters are passed on stdin and bound
+// with JDBC placeholders; nil entries become SQL NULL.
+func (b *Bridge) Query(ctx context.Context, url, username, password, sql string, params []*string) (ExecResult, error) {
+	response, err := b.run(ctx, url, username, password, "query", encodeQueryInput(sql, params))
+	if err != nil {
+		return ExecResult{}, err
+	}
+	return execResultFrom(response), nil
+}
+
+func execResultFrom(response bridgeResponse) ExecResult {
 	result := ExecResult{
 		Columns:      response.Columns,
 		Rows:         response.Rows,
@@ -173,7 +211,26 @@ func (b *Bridge) Execute(ctx context.Context, url, username, password, sql strin
 	if result.Rows == nil {
 		result.Rows = [][]*string{}
 	}
-	return result, nil
+	return result
+}
+
+func encodeQueryInput(sql string, params []*string) string {
+	var builder strings.Builder
+	builder.WriteString("n=")
+	builder.WriteString(strconv.Itoa(len(params)))
+	builder.WriteByte('\n')
+	for _, param := range params {
+		if param == nil {
+			builder.WriteString("N\n")
+			continue
+		}
+		builder.WriteByte('S')
+		builder.WriteString(base64.StdEncoding.EncodeToString([]byte(*param)))
+		builder.WriteByte('\n')
+	}
+	builder.WriteString("SQL\n")
+	builder.WriteString(sql)
+	return builder.String()
 }
 
 // Tables reads user table and column metadata.
@@ -192,6 +249,17 @@ func (b *Bridge) Tables(ctx context.Context, url, username, password string) (Sc
 		}
 		if snapshot.Tables[i].Columns == nil {
 			snapshot.Tables[i].Columns = []ColumnInfo{}
+		}
+		if snapshot.Tables[i].ForeignKeys == nil {
+			snapshot.Tables[i].ForeignKeys = []ForeignKeyInfo{}
+		}
+		if snapshot.Tables[i].Indexes == nil {
+			snapshot.Tables[i].Indexes = []IndexInfo{}
+		}
+		for j := range snapshot.Tables[i].Indexes {
+			if snapshot.Tables[i].Indexes[j].Columns == nil {
+				snapshot.Tables[i].Indexes[j].Columns = []string{}
+			}
 		}
 	}
 	return snapshot, nil

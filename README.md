@@ -8,11 +8,11 @@
   <a href="https://godfatherthr.github.io/tailsql/docs.html">Documentation</a>
 </p>
 
-Local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, and generated Java (JDBC) connectivity code.
+Local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, generated Java (JDBC) code, a built-in MCP server for AI coding agents, an Auto-REST gateway, checkpoints, and optional LLM SQL assistance.
 
-TailSQL runs H2 as a loopback-only TCP server, exposes it to your tailnet through a Go L4 proxy when you opt in, and produces copy-paste Maven, Gradle, HikariCP, Spring Boot, and raw JDBC snippets matching the selected connection mode.
+TailSQL runs H2 as a loopback-only TCP server, exposes it to your tailnet through a Go L4 proxy when you opt in, and produces copy-paste Maven, Gradle, HikariCP, Spring Boot, and raw JDBC snippets matching the selected connection mode. In v0.3.0 it also lets Windsurf, Cursor, Claude Code, or any MCP client inspect schemas, run queries, seed data, and fetch connection bundles — while browser apps talk to the same database through a generated REST/JSON API.
 
-> **Verification status:** MVP `0.2.1` is implemented and locally verified. Go unit tests, real-H2 lifecycle/adoption and untracked-orphan integration tests, the table editor integration test, the H2 downloader, the frontend production build, and the Wails production build all pass. Generated HikariCP and raw JDBC programs were compiled with `javac --release 11` and executed against H2. The only unexercised path is a live remote Tailscale peer and a live public Funnel mapping; proxy forwarding/metrics are covered by a loopback test, and Funnel status/URL logic is unit tested.
+> **Verification status:** v0.3.0 is implemented and locally verified. Go unit and real-H2 integration tests cover the lifecycle, table editor, prepared statements, foreign-key/index metadata, online backup/restore, MCP tools over HTTP, REST auth/list/insert/OpenAPI, and checkpoint creation. The frontend production build and Wails build pass. The only unexercised path is a live remote Tailscale peer and a live public Funnel mapping; proxy forwarding/metrics are covered by a loopback test, and Funnel status/URL logic is unit tested.
 
 ## Install on Windows
 
@@ -32,7 +32,12 @@ The installer includes the pinned H2 engine. Java 11 or newer is required. Tails
 - Toggle Tailscale exposure and watch active peers plus byte throughput live.
 - Publish a database to the public internet with Tailscale Funnel on an allowed public port (443, 8443, or 10000), with explicit exposure warnings and automatic Funnel cleanup when the database stops.
 - Render Java connectivity code with active credentials, ports, and MagicDNS context.
-- Run SQL and inspect tables/columns with a built-in workbench (500-row result cap).
+- Run SQL and inspect tables/columns with a built-in workbench (500-row result cap). Keep query drafts per database across views and restarts.
+- **Connect to AI:** one-click MCP server on `127.0.0.1:9099` with Bearer auth, optional Tailnet bind, copy-ready Windsurf/Cursor/Claude configs, and a generated system prompt containing live schema, JDBC URLs, and REST keys. Tools: `list_databases`, `inspect_schema`, `read_query`, `write_query`, `execute_ddl`, `get_connection_bundle`.
+- **Agent safe mode:** read-only mode for agents and automatic `Pre-Agent DDL` checkpoints before `DROP`/`TRUNCATE`/`ALTER`.
+- **Auto-REST gateway:** `/api/v1/<db>/<schema>/<table>` CRUD for tables, read-only views, filters, pagination, CORS, API key/Bearer auth, and OpenAPI 3.0 at `/api/v1/<db>/openapi.json`; bind loopback, Tailnet, or public HTTPS Funnel.
+- **Checkpoints:** consistent `.mv.db` snapshots under `~/.tailsql/snapshots`, create/restore/delete from the database header, same-port restart with Tailscale/Funnel re-enabled.
+- **AI SQL + mock data:** schema-aware natural-language-to-H2 SQL in the workbench and a 10/50-row seeder in the table editor using local Ollama or OpenRouter/OpenAI-compatible APIs, with a deterministic offline fallback.
 - Recover cleanly from app crashes by validating and adopting (or cleaning) persisted H2 PIDs. Orphan H2 servers that still hold a database file but were never persisted are found by command line, adopted if healthy, or terminated if wedged.
 
 ## Requirements
