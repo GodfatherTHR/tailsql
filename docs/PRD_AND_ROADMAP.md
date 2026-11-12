@@ -2,7 +2,7 @@
 
 > **Product:** TailSQL — a local-first H2 database manager for Java developers and AI coding agents, with one-click Tailscale sharing, generated JDBC code, an embedded MCP server, and an auto-generated REST gateway.
 >
-> **Status:** v0.2.1 shipped. v0.3.0 in implementation.
+> **Status:** v0.2.1 shipped. v0.3.0 implemented and verified.
 > **Last updated:** 2026-11-12
 
 ---

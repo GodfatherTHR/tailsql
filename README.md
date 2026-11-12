@@ -16,7 +16,7 @@ TailSQL runs H2 as a loopback-only TCP server, exposes it to your tailnet throug
 
 ## Install on Windows
 
-Download `TailSQL-Setup-0.2.1.exe` from [GitHub Releases](https://github.com/GodfatherTHR/tailsql/releases/latest).
+Download `TailSQL-Setup-0.3.0.exe` from [GitHub Releases](https://github.com/GodfatherTHR/tailsql/releases/latest).
 
 1. Run the installer. Windows SmartScreen may ask you to confirm because the installer is unsigned.
 2. Launch TailSQL from the Start Menu or the desktop shortcut.
@@ -72,7 +72,8 @@ Production build (copies `h2.jar` next to the executable and creates a versioned
 ```powershell
 scripts/build.ps1
 build/bin/TailSQL.exe
-build/bin/TailSQL-0.2.1.exe
+build/bin/TailSQL-0.3.0.exe
+build/bin/tailsql-mcp.exe
 ```
 
 Windows installer (requires NSIS):
