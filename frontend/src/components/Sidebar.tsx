@@ -1,5 +1,4 @@
 import {
-  Database,
   Globe2,
   Network,
   Plus,
@@ -9,6 +8,7 @@ import {
 import type { Instance, SystemHealth } from '../types';
 import { statusLabel } from '../lib/format';
 import { statusDotClass } from './StatusBadge';
+import logoMark from '../assets/logo-mark.png';
 
 interface SidebarProps {
   instances: Instance[];
@@ -47,8 +47,8 @@ export function Sidebar({
   return (
     <aside className="flex h-full w-[290px] flex-none flex-col border-r border-white/[0.06] bg-ink-900/55">
       <div className="flex h-[76px] items-center gap-3 border-b border-white/[0.06] px-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-mint-400/20 bg-gradient-to-br from-mint-400/20 to-cyan-400/5 shadow-[0_0_24px_-8px_rgba(52,211,153,0.5)]">
-          <Database size={20} className="text-mint-300" />
+        <div className="flex h-10 w-10 flex-none overflow-hidden rounded-xl border border-mint-400/20 shadow-[0_0_24px_-8px_rgba(52,211,153,0.5)]">
+          <img src={logoMark} alt="TailSQL" className="h-full w-full object-cover" />
         </div>
         <div className="min-w-0">
           <div className="flex items-baseline gap-2">

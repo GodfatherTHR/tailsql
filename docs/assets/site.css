@@ -172,6 +172,8 @@ kbd {
   width: 36px;
   height: 36px;
   flex: none;
+  border-radius: 10px;
+  object-fit: cover;
 }
 
 .brand-text {
@@ -512,6 +514,8 @@ kbd {
 .app-brand img {
   width: 22px;
   height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .app-brand strong {

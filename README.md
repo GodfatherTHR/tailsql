@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.png" alt="TailSQL logo" width="200">
+</p>
+
 # TailSQL
 
 <p align="center">
