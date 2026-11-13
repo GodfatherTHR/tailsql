@@ -34,7 +34,7 @@ const snippetTabs = [
   { key: 'cursor', label: 'Cursor', file: '.cursor/mcp.json' },
   { key: 'claude', label: 'Claude Code', file: 'claude_desktop_config.json' },
   { key: 'environment', label: 'Env vars', file: '.env' },
-  { key: 'prompt', label: 'Agent prompt', file: 'tailsql-agent-prompt.md' },
+  { key: 'prompt', label: 'Agent prompt', file: 'hysql-agent-prompt.md' },
 ] as const;
 
 type SnippetKey = (typeof snippetTabs)[number]['key'];
@@ -175,7 +175,7 @@ export function AgentConnectView({ instance, onOpenAISettings, onToast }: AgentC
           <p className="label mb-1">Agent bridge</p>
           <h1 className="text-xl font-semibold tracking-tight text-slate-100">Connect to AI</h1>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
-            Expose {instance.name} and every other TailSQL database to Windsurf, Cursor, Claude Code,
+            Expose {instance.name} and every other HySQL database to Windsurf, Cursor, Claude Code,
             or any MCP client. Copy a snippet below, or paste the agent prompt into a chat so the
             agent knows the live schema, JDBC URLs, and REST endpoints.
           </p>
@@ -343,7 +343,7 @@ export function AgentConnectView({ instance, onOpenAISettings, onToast }: AgentC
                   }
                 />
                 <div className="px-3 pb-2 pt-1 text-[10px] leading-relaxed text-slate-600">
-                  Checkpoints live in ~/.tailsql/snapshots and can be restored from the database
+                  Checkpoints live in ~/.hysql/snapshots and can be restored from the database
                   header at any time.
                 </div>
               </div>
@@ -426,7 +426,7 @@ export function AgentConnectView({ instance, onOpenAISettings, onToast }: AgentC
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
                       <KeyRound size={11} />
-                      X-TailSQL-Key
+                      X-HySQL-Key
                     </span>
                     <div className="flex items-center gap-1">
                       <button

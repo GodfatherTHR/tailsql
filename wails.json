@@ -1,19 +1,19 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "tailsql",
-  "outputfilename": "TailSQL",
+  "name": "hysql",
+  "outputfilename": "HySQL",
   "frontend:install": "npm install --include=dev",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "TailSQL",
-    "email": "dev@tailsql.local"
+    "name": "HySQL",
+    "email": "dev@hysql.local"
   },
   "info": {
-    "productName": "TailSQL",
+    "productName": "HySQL",
     "productVersion": "0.3.0",
-    "copyright": "TailSQL contributors",
+    "copyright": "HySQL contributors",
     "comments": "Local-first H2 database manager with Tailscale hosting"
   }
 }

@@ -1,8 +1,8 @@
-# TailSQL — Architecture (v0.3.0)
+# HySQL — Architecture (v0.3.0)
 
 > Local-first H2 database manager with Desktop UI, MCP agent server, Auto-REST gateway, checkpoints, and optional LLM assistance.
 >
-> Last updated: 2026-11-12
+> Last updated: 2026-11-13
 
 ## 1. Runtime Topology
 
@@ -16,7 +16,7 @@
 │   ├─ internal/dbmanager ──► H2 TCP server 127.0.0.1:<port>               │
 │   ├─ internal/jdbc ───────► short-lived JVM + JdbcBridge                 │
 │   ├─ internal/sqlrunner ──► SQL + metadata                               │
-│   ├─ internal/snapshots ──► ~/.tailsql/snapshots/<db>/*.mv.db            │
+│   ├─ internal/snapshots ──► ~/.hysql/snapshots/<db>/*.mv.db            │
 │   ├─ internal/mcp ────────► HTTP 127.0.0.1:9099 / Tailnet IP             │
 │   ├─ internal/restapi ────► HTTP 127.0.0.1:9199 / Tailnet IP / Funnel    │
 │   ├─ internal/aihelper ───► Ollama / OpenAI-compatible APIs              │
@@ -34,7 +34,7 @@
 1. H2 always binds loopback (`-tcp` + `-Dh2.bindAddress=127.0.0.1`); remote access only through the Tailscale proxy.
 2. MCP and REST servers default to `127.0.0.1`. Tailnet binding requires an explicit user toggle and a validated CGNAT IPv4 (`100.64.0.0/10`).
 3. `0.0.0.0`, `::`, LAN, and arbitrary host binds are rejected before `net.Listen`.
-4. Tokens (`tsql_mcp_*`, `tsql_rest_*`) are required whenever a server is exposed beyond loopback.
+4. Tokens (`hysql_mcp_*`, `hysql_rest_*`) are required whenever a server is exposed beyond loopback.
 5. Agent Read-Only mode is enforced in the backend adapter for MCP writes/DDL, independent of the UI.
 6. REST identifiers are validated against live `INFORMATION_SCHEMA` metadata and quoted; all values use JDBC `?` parameters.
 
@@ -46,9 +46,9 @@ internal/
   restapi/        Dynamic CRUD router, OpenAPI generator, CORS/API-key middleware
   snapshots/      .mv.db checkpoint store (list/create/extract/restore/delete)
   aihelper/       Ollama + OpenAI-compatible clients, NL→SQL, deterministic faker
-  config/         preferences.go — ~/.tailsql/config.json (v0.3 prefs)
+  config/         preferences.go — ~/.hysql/config.json (v0.3 prefs)
 cmd/
-  tailsql-mcp/    stdio ↔ HTTP MCP bridge for local agents
+  hysql-mcp/    stdio ↔ HTTP MCP bridge for local agents
 ```
 
 App wiring lives in new files:
@@ -57,7 +57,7 @@ App wiring lives in new files:
 - `app_features.go` — MCP/REST/AI preference APIs, server lifecycle, snippets.
 - `app_snapshots.go` — checkpoint APIs and restore orchestration.
 
-## 4. Preferences (`~/.tailsql/config.json`)
+## 4. Preferences (`~/.hysql/config.json`)
 
 Atomic JSON store, `0600`, defaults filled on load:
 
@@ -66,13 +66,13 @@ Atomic JSON store, `0600`, defaults filled on load:
   "mcpEnabled": false,
   "mcpPort": 9099,
   "mcpTailscaleEnabled": false,
-  "mcpToken": "tsql_mcp_...",
+  "mcpToken": "hysql_mcp_...",
   "restEnabled": false,
   "restPort": 9199,
   "restTailscaleEnabled": false,
   "restFunnelEnabled": false,
   "restFunnelPort": 443,
-  "restApiKey": "tsql_rest_...",
+  "restApiKey": "hysql_rest_...",
   "restAllowPublicRead": false,
   "agentReadOnly": false,
   "autoSnapshotOnAgentDDL": true,
@@ -86,9 +86,11 @@ Atomic JSON store, `0600`, defaults filled on load:
 
 `instances.json` is untouched, preserving v0.2.1 state compatibility.
 
+Brand migration: on first launch, `migrateLegacyDataDir` renames the pre-rebrand `~/.tailsql` tree to `~/.hysql` when the new directory does not exist, preserving databases, credentials, and checkpoints. If the rename fails (for example, an orphan H2 process still holds a file), startup reports the error instead of silently starting with an empty data directory.
+
 ## 5. Snapshot Manager
 
-- Root: `~/.tailsql/snapshots/<db_name>/`.
+- Root: `~/.hysql/snapshots/<db_name>/`.
 - File: `<UTC timestamp>_<sanitized label>.mv.db`.
 - Online creation: SQL `BACKUP TO '<temp>.zip'` via the JDBC bridge (consistent H2 backup), then extract the `.mv.db` member with `archive/zip`. Stopped databases fall back to a direct file copy.
 - Restore: stop Tailscale proxy → graceful H2 stop → verify stopped → replace `.mv.db` (atomic copy via temp + rename, removing stale trace files) → restart H2 on the same port → restore Tailscale proxy/Funnel if previously enabled.

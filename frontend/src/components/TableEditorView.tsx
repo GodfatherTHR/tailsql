@@ -988,7 +988,7 @@ function tableKey(table: TableInfo): string {
 }
 
 function selectionStorageKey(instanceId: string): string {
-  return `tailsql.tableEditor.selection.${instanceId}`;
+  return `hysql.tableEditor.selection.${instanceId}`;
 }
 
 function readTableSelection(instanceId: string): string | null {

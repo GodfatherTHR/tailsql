@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 const stillActive = 259

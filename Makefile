@@ -5,7 +5,7 @@ help:
 	@echo "bridge      Compile the embedded JDBC bridge (requires a JDK)"
 	@echo "frontend    Install deps and build the React bundle"
 	@echo "test        Run Go unit tests"
-	@echo "integration Run real-H2 integration tests (TAILSQL_INTEGRATION=1)"
+	@echo "integration Run real-H2 integration tests (HYSQL_INTEGRATION=1)"
 	@echo "vet         Run go vet"
 	@echo "build       Wails production build (requires Wails CLI)"
 	@echo "dev         Wails development mode"
@@ -23,7 +23,7 @@ test:
 	go test ./...
 
 integration:
-	TAILSQL_INTEGRATION=1 go test ./internal/dbmanager -run Integration -v
+	HYSQL_INTEGRATION=1 go test ./internal/dbmanager -run Integration -v
 
 vet:
 	go vet ./...

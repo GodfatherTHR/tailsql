@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TailSQL | Local-first H2 database manager</title>
-  <meta name="description" content="TailSQL is a local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, and Java connection code.">
+  <title>HySQL | Local-first H2 database manager</title>
+  <meta name="description" content="HySQL is a local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, and Java connection code.">
   <meta name="theme-color" content="#060a0e">
-  <meta property="og:title" content="TailSQL | Local-first H2 database manager">
+  <meta property="og:title" content="HySQL | Local-first H2 database manager">
   <meta property="og:description" content="Create H2 databases, edit rows, run SQL, share over Tailscale, and publish with Funnel when you choose.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://godfatherthr.github.io/tailsql/">
-  <meta property="og:image" content="https://godfatherthr.github.io/tailsql/assets/logo.png">
+  <meta property="og:url" content="https://godfatherthr.github.io/hysql/">
+  <meta property="og:image" content="https://godfatherthr.github.io/hysql/assets/logo.png">
   <link rel="icon" href="./assets/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="./assets/appicon.png">
   <script>document.documentElement.classList.add("js");</script>
@@ -21,17 +21,17 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <div class="announcement">
-    <strong>TailSQL 0.3.0 is out.</strong>
+    <strong>HySQL 0.3.0 is out.</strong>
     Built-in MCP server for AI agents, Auto-REST, checkpoints, and AI SQL tools.
-    <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">See the release</a>
+    <a href="https://github.com/GodfatherTHR/hysql/releases/latest">See the release</a>
   </div>
 
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="./index.html" aria-label="TailSQL home">
+      <a class="brand" href="./index.html" aria-label="HySQL home">
         <img src="./assets/logo-mark.png" alt="" width="36" height="36">
         <span class="brand-text">
-          <strong>TailSQL</strong>
+          <strong>HySQL</strong>
           <span>H2 over Tailscale</span>
         </span>
       </a>
@@ -39,8 +39,8 @@
         <a href="#features">Features</a>
         <a href="#preview">Product</a>
         <a href="./docs.html">Docs</a>
-        <a class="nav-download" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Download</a>
-        <a class="nav-github" href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
+        <a class="nav-download" href="https://github.com/GodfatherTHR/hysql/releases/latest">Download</a>
+        <a class="nav-github" href="https://github.com/GodfatherTHR/hysql">GitHub</a>
       </nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
     </div>
@@ -54,11 +54,11 @@
             <span class="eyebrow"><span class="pulse"></span> Local-first database console</span>
             <h1>Your H2 database, local-first and <span class="gradient">tailnet-ready.</span></h1>
             <p class="hero-lede">
-              TailSQL gives you a fast desktop console for H2. Create databases, edit rows,
+              HySQL gives you a fast desktop console for H2. Create databases, edit rows,
               run SQL, share over Tailscale, and publish with Funnel when you choose.
             </p>
             <div class="hero-actions">
-              <a class="btn btn-primary" href="https://github.com/GodfatherTHR/tailsql/releases/latest/download/TailSQL-Setup-0.3.0.exe">
+              <a class="btn btn-primary" href="https://github.com/GodfatherTHR/hysql/releases/latest/download/HySQL-Setup-0.3.0.exe">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
                 Download for Windows
               </a>
@@ -82,7 +82,7 @@
                 <span class="window-dot red"></span>
                 <span class="window-dot amber"></span>
                 <span class="window-dot green"></span>
-                <span class="window-title">TailSQL</span>
+                <span class="window-title">HySQL</span>
                 <span class="window-chip">Local-first</span>
               </div>
               <div class="app-shell">
@@ -90,7 +90,7 @@
                   <div class="app-brand">
                     <img src="./assets/logo-mark.png" alt="" width="22" height="22">
                     <div>
-                      <strong>TailSQL</strong>
+                      <strong>HySQL</strong>
                       <small>H2 over Tailscale</small>
                     </div>
                   </div>
@@ -198,7 +198,7 @@
           <span class="section-kicker">Everything in one console</span>
           <h2>A database manager that respects the local machine.</h2>
           <p class="section-lede">
-            TailSQL keeps the engine on loopback, adds sharing only when you ask for it,
+            HySQL keeps the engine on loopback, adds sharing only when you ask for it,
             and gives you the everyday tools to work with H2 without a separate admin stack.
           </p>
         </div>
@@ -306,7 +306,7 @@
           <span class="section-kicker">Sharing</span>
           <h2>From loopback to tailnet to the public internet.</h2>
           <p class="section-lede">
-            H2 always binds to 127.0.0.1. TailSQL adds sharing only when you turn it on,
+            H2 always binds to 127.0.0.1. HySQL adds sharing only when you turn it on,
             and each step is a separate choice.
           </p>
         </div>
@@ -362,7 +362,7 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
             <span class="section-kicker">Java connectivity</span>
             <h2>Connect from Java in minutes.</h2>
             <p>
-              TailSQL generates copy-ready connection code for local and tailnet modes,
+              HySQL generates copy-ready connection code for local and tailnet modes,
               using the credentials stored on this machine. Switch modes and the snippets update.
             </p>
             <div class="mini" style="margin-top: 22px;">
@@ -391,12 +391,12 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
         </div>
         <div class="steps">
           <article class="step reveal">
-            <h3>Install TailSQL</h3>
-            <p>Download the Windows setup, run it, and launch TailSQL. Java 11 or newer is required, and the H2 engine is included.</p>
+            <h3>Install HySQL</h3>
+            <p>Download the Windows setup, run it, and launch HySQL. Java 11 or newer is required, and the H2 engine is included.</p>
           </article>
           <article class="step reveal">
             <h3>Create a database</h3>
-            <p>Pick a name and a password. TailSQL starts a loopback H2 server on the next free port and stores the database under <code>~/.tailsql</code>.</p>
+            <p>Pick a name and a password. HySQL starts a loopback H2 server on the next free port and stores the database under <code>~/.hysql</code>.</p>
           </article>
           <article class="step reveal">
             <h3>Edit, query, share</h3>
@@ -409,20 +409,20 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
     <section class="section" id="download">
       <div class="container">
         <div class="download-band reveal">
-          <h2>Get TailSQL 0.3.0 for Windows.</h2>
+          <h2>Get HySQL 0.3.0 for Windows.</h2>
           <p>The installer includes the H2 engine. Tailscale is optional, and your databases stay on your machine.</p>
           <div class="download-actions">
-            <a class="btn btn-primary" href="https://github.com/GodfatherTHR/tailsql/releases/latest/download/TailSQL-Setup-0.3.0.exe">
+            <a class="btn btn-primary" href="https://github.com/GodfatherTHR/hysql/releases/latest/download/HySQL-Setup-0.3.0.exe">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
               Download setup.exe
             </a>
-            <a class="btn btn-secondary" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Release notes</a>
+            <a class="btn btn-secondary" href="https://github.com/GodfatherTHR/hysql/releases/latest">Release notes</a>
           </div>
           <div class="download-meta">
             <span>Windows 10 and 11 x64</span>
             <span>Java 11 or newer</span>
             <span>Tailscale optional</span>
-            <span>Data stays in ~/.tailsql</span>
+            <span>Data stays in ~/.hysql</span>
           </div>
           <div class="callout note" style="margin-top: 24px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
@@ -439,7 +439,7 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
         <div class="footer-brand">
           <a class="brand" href="./index.html">
             <img src="./assets/logo-mark.png" alt="" width="34" height="34">
-            <span class="brand-text"><strong>TailSQL</strong><span>H2 over Tailscale</span></span>
+            <span class="brand-text"><strong>HySQL</strong><span>H2 over Tailscale</span></span>
           </a>
           <p>A local-first H2 database manager for Windows. Create, edit, query, and share without giving up control of the engine.</p>
         </div>
@@ -453,9 +453,9 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
         <div class="footer-col">
           <h3>Resources</h3>
           <a href="./docs.html">Documentation</a>
-          <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">Releases</a>
-          <a href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
-          <a href="https://github.com/GodfatherTHR/tailsql/issues">Issues</a>
+          <a href="https://github.com/GodfatherTHR/hysql/releases/latest">Releases</a>
+          <a href="https://github.com/GodfatherTHR/hysql">GitHub</a>
+          <a href="https://github.com/GodfatherTHR/hysql/issues">Issues</a>
         </div>
         <div class="footer-col">
           <h3>Stack</h3>
@@ -466,8 +466,8 @@ return <span class="key">new</span> HikariDataSource(config);</code></pre>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; <span data-year>2026</span> TailSQL contributors.</span>
-        <span class="legal">Tailscale is a trademark of Tailscale Inc. TailSQL is an independent project and is not affiliated with Tailscale Inc.</span>
+        <span>&copy; <span data-year>2026</span> HySQL contributors.</span>
+        <span class="legal">Tailscale is a trademark of Tailscale Inc. HySQL is an independent project and is not affiliated with Tailscale Inc.</span>
       </div>
     </div>
   </footer>

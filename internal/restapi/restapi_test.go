@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 type fakeBackend struct {
@@ -64,7 +64,7 @@ func newTestServer(backend *fakeBackend, requireAuth bool) *Server {
 	return New(Config{
 		BindAddress: "127.0.0.1",
 		Port:        9199,
-		APIKey:      "tsql_rest_test",
+		APIKey:      "hysql_rest_test",
 		RequireAuth: requireAuth,
 		Version:     "0.3.0",
 	}, backend)
@@ -138,7 +138,7 @@ func TestAuthAndListRoute(t *testing.T) {
 	}
 
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/inven_db/INVENTORY/PRODUCTS?limit=10", nil)
-	request.Header.Set("X-TailSQL-Key", "tsql_rest_test")
+	request.Header.Set("X-HySQL-Key", "hysql_rest_test")
 	recorder := httptest.NewRecorder()
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {

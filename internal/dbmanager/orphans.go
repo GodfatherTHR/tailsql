@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/jdbc"
+	"hysql/internal/config"
+	"hysql/internal/jdbc"
 )
 
 // findInstanceH2Processes finds Java H2 servers whose command line matches

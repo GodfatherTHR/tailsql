@@ -1,4 +1,4 @@
-module tailsql
+module hysql
 
 go 1.27.0
 

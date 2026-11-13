@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/codegen"
-	"tailsql/internal/config"
-	"tailsql/internal/dbmanager"
-	"tailsql/internal/jdbc"
-	"tailsql/internal/sqlrunner"
-	"tailsql/internal/tailscale"
+	"hysql/internal/codegen"
+	"hysql/internal/config"
+	"hysql/internal/dbmanager"
+	"hysql/internal/jdbc"
+	"hysql/internal/sqlrunner"
+	"hysql/internal/tailscale"
 )
 
 // GetSystemHealth returns the cached diagnostics snapshot.
@@ -398,7 +398,7 @@ func (a *App) enableFunnelForInstance(instance config.Instance, port int) (tails
 	}
 	manager, store, _ := a.components()
 	if manager == nil || store == nil {
-		err := errors.New("TailSQL backend is not initialized")
+		err := errors.New("HySQL backend is not initialized")
 		state.Error = err.Error()
 		return state, err
 	}

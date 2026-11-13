@@ -43,12 +43,12 @@ public final class JdbcBridge {
 
     public static void main(String[] args) {
         String mode = args.length > 0 ? args[0] : "exec";
-        String url = env("TAILSQL_JDBC_URL");
-        String user = env("TAILSQL_JDBC_USER");
-        String password = env("TAILSQL_JDBC_PASSWORD");
+        String url = env("HYSQL_JDBC_URL");
+        String user = env("HYSQL_JDBC_USER");
+        String password = env("HYSQL_JDBC_PASSWORD");
 
         if (url.isEmpty()) {
-            printError("TAILSQL_JDBC_URL is required", null, 0);
+            printError("HYSQL_JDBC_URL is required", null, 0);
             System.exit(3);
         }
 

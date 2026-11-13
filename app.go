@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,12 +12,12 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"tailsql/internal/config"
-	"tailsql/internal/dbmanager"
-	"tailsql/internal/mcp"
-	"tailsql/internal/restapi"
-	"tailsql/internal/snapshots"
-	"tailsql/internal/tailscale"
+	"hysql/internal/config"
+	"hysql/internal/dbmanager"
+	"hysql/internal/mcp"
+	"hysql/internal/restapi"
+	"hysql/internal/snapshots"
+	"hysql/internal/tailscale"
 )
 
 const (
@@ -64,7 +65,11 @@ func (a *App) startup(ctx context.Context) {
 		a.recordInitError(fmt.Errorf("resolve home directory: %w", err))
 		return
 	}
-	dataDir := filepath.Join(home, ".tailsql")
+	dataDir := filepath.Join(home, ".hysql")
+	if err := migrateLegacyDataDir(filepath.Join(home, ".tailsql"), dataDir); err != nil {
+		a.recordInitError(fmt.Errorf("migrate legacy application data: %w", err))
+		return
+	}
 	if err := os.MkdirAll(dataDir, 0o700); err != nil {
 		a.recordInitError(fmt.Errorf("create application data directory %s: %w", dataDir, err))
 		return
@@ -174,6 +179,28 @@ func (a *App) startup(ctx context.Context) {
 	a.emitAgentState()
 }
 
+// migrateLegacyDataDir moves the pre-rebrand ~/.tailsql tree into the HySQL
+// data directory once, so existing databases, credentials, and checkpoints
+// remain available after the rename.
+func migrateLegacyDataDir(legacyDir, dataDir string) error {
+	if _, err := os.Stat(dataDir); err == nil {
+		return nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	info, err := os.Stat(legacyDir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return nil
+	}
+	return os.Rename(legacyDir, dataDir)
+}
+
 func (a *App) shutdown(_ context.Context) {
 	a.shuttingDown.Store(true)
 	a.stopRealtimeWatcher()
@@ -263,10 +290,10 @@ func (a *App) ready() error {
 	manager := a.manager
 	a.mu.RUnlock()
 	if err != nil {
-		return fmt.Errorf("TailSQL backend is not initialized: %w", err)
+		return fmt.Errorf("HySQL backend is not initialized: %w", err)
 	}
 	if manager == nil {
-		return fmt.Errorf("TailSQL backend is not initialized")
+		return fmt.Errorf("HySQL backend is not initialized")
 	}
 	return nil
 }

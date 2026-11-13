@@ -1,10 +1,10 @@
 package main
 
 import (
-	"tailsql/internal/config"
-	"tailsql/internal/dbmanager"
-	"tailsql/internal/jdbc"
-	"tailsql/internal/tailscale"
+	"hysql/internal/config"
+	"hysql/internal/dbmanager"
+	"hysql/internal/jdbc"
+	"hysql/internal/tailscale"
 )
 
 // SystemHealth is the diagnostics payload rendered by the UI.

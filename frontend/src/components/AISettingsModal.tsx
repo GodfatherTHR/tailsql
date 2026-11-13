@@ -107,7 +107,7 @@ export function AISettingsModal({ open, onClose, onSaved, onToast }: AISettingsM
       open={open}
       onClose={onClose}
       title="AI settings"
-      description="Used by the SQL assistant and the mock-data seeder. Keys stay in ~/.tailsql/config.json."
+      description="Used by the SQL assistant and the mock-data seeder. Keys stay in ~/.hysql/config.json."
       preventClose={saving}
       footer={
         <>

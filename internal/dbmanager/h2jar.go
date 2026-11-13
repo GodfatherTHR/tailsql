@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// Pinned H2 engine distributed with TailSQL.
+// Pinned H2 engine distributed with HySQL.
 const (
 	H2Version     = "2.3.232"
 	H2FileName    = "h2.jar"
@@ -93,7 +93,7 @@ func ResolveH2Jar(configuredPath string, candidates []string) H2Info {
 }
 
 // ValidateH2Jar verifies the archive is a real H2 distribution containing the
-// classes TailSQL invokes.
+// classes HySQL invokes.
 func ValidateH2Jar(path string) error {
 	reader, err := zip.OpenReader(path)
 	if err != nil {
@@ -124,7 +124,7 @@ func DownloadH2(ctx context.Context, destDir string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("build H2 download request: %w", err)
 	}
-	request.Header.Set("User-Agent", "TailSQL/0.1 (+local desktop)")
+	request.Header.Set("User-Agent", "HySQL/0.1 (+local desktop)")
 
 	client := &http.Client{Timeout: 3 * time.Minute}
 	response, err := client.Do(request)
@@ -184,7 +184,7 @@ func describeH2Source(path string) string {
 	switch {
 	case strings.Contains(lower, "/assets/"):
 		return "application assets"
-	case strings.Contains(lower, ".tailsql/"):
+	case strings.Contains(lower, ".hysql/"):
 		return "application data"
 	default:
 		return "local file"

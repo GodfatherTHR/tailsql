@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 // MaxQueryLength protects the IPC boundary from oversized payloads.

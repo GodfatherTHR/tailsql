@@ -35,7 +35,7 @@ export function HealthBanner({
     <div className="space-y-2 border-b border-white/[0.05] bg-ink-950/40 px-6 py-3">
       {fatal ? (
         <Banner tone="error" icon={<AlertTriangle size={16} />} title="Backend unavailable">
-          {health.error || 'TailSQL could not initialize its local state.'}
+          {health.error || 'HySQL could not initialize its local state.'}
           <BannerActions>
             <button type="button" className="btn-secondary btn-xs" onClick={onRefresh} disabled={refreshing}>
               <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />

@@ -76,7 +76,7 @@ export function CreateDatabaseModal({
       open={open}
       onClose={onClose}
       title="New H2 database"
-      description="TailSQL starts a loopback-only TCP server with generated credentials."
+      description="HySQL starts a loopback-only TCP server with generated credentials."
       preventClose={creating}
       footer={
         <>
@@ -198,13 +198,13 @@ export function CreateDatabaseModal({
             </button>
           </div>
           <p className="mt-1.5 text-[11px] text-slate-600">
-            Stored locally in <span className="font-mono">~/.tailsql/instances.json</span>.
+            Stored locally in <span className="font-mono">~/.hysql/instances.json</span>.
           </p>
         </div>
 
         <div className="rounded-xl border border-white/[0.06] bg-ink-950/40 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
           The database is created on first connection, then started immediately. The H2 file lands
-          in <span className="font-mono text-slate-400">~/.tailsql/dbs/{normalizedName || 'name'}.mv.db</span>.
+          in <span className="font-mono text-slate-400">~/.hysql/dbs/{normalizedName || 'name'}.mv.db</span>.
         </div>
       </form>
     </Modal>

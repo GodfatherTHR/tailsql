@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/executil"
+	"hysql/internal/config"
+	"hysql/internal/executil"
 )
 
 func integrationPrerequisites(t *testing.T) (JavaInfo, H2Info) {
 	t.Helper()
-	if os.Getenv("TAILSQL_INTEGRATION") != "1" {
-		t.Skip("set TAILSQL_INTEGRATION=1 to run H2 lifecycle integration tests")
+	if os.Getenv("HYSQL_INTEGRATION") != "1" {
+		t.Skip("set HYSQL_INTEGRATION=1 to run H2 lifecycle integration tests")
 	}
 	java := DetectJava("")
 	if !java.Supported {

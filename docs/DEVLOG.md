@@ -1,4 +1,4 @@
-# TailSQL — Engineering Devlog
+# HySQL — Engineering Devlog
 
 Chronological record of v0.3.0 implementation. Newest entries are appended at the bottom.
 
@@ -13,7 +13,7 @@ Chronological record of v0.3.0 implementation. Newest entries are appended at th
 - Created `docs/PRD_AND_ROADMAP.md` with v0.3.0 goals, personas, functional scope, acceptance criteria, and phase checkboxes.
 - Created `docs/MCP_AND_REST_SPEC.md` documenting MCP transports/methods/tools/resources and every REST route, filter, response envelope, and security rule.
 - Created `docs/ARCHITECTURE.md` describing the MCP/REST/snapshot/AI packages, binding rules, preferences schema, and IPC additions.
-- Preserved all v0.2.1 behavior and `instances.json` compatibility as hard requirements; new settings live in `~/.tailsql/config.json`.
+- Preserved all v0.2.1 behavior and `instances.json` compatibility as hard requirements; new settings live in `~/.hysql/config.json`.
 
 **Decisions**
 
@@ -30,7 +30,7 @@ Chronological record of v0.3.0 implementation. Newest entries are appended at th
 
 **Implementation**
 
-- `internal/snapshots`: atomic `.mv.db` checkpoint store under `~/.tailsql/snapshots/<db>/`, timestamp + sanitized label names, list/delete/prune, zip extraction, and atomic restore (`temp file → fsync → replace`, clearing stale trace/lock files).
+- `internal/snapshots`: atomic `.mv.db` checkpoint store under `~/.hysql/snapshots/<db>/`, timestamp + sanitized label names, list/delete/prune, zip extraction, and atomic restore (`temp file → fsync → replace`, clearing stale trace/lock files).
 - `internal/jdbc/JdbcBridge.java`: extended `tables` metadata with table/column remarks, foreign keys, and indexes; added the framed `query` mode using `PreparedStatement` with Base64 parameters on stdin.
 - `internal/jdbc/bridge.go`: `Query` method, query-input framing, relation structs.
 - `internal/dbmanager`: `DatabasePath(id)` so restores target the exact `.mv.db`.
@@ -51,11 +51,11 @@ Chronological record of v0.3.0 implementation. Newest entries are appended at th
 **Implementation**
 
 - `internal/mcp`: JSON-RPC 2.0 server with `POST /mcp`, SSE keepalive `GET /mcp`, legacy `GET /sse` + `POST /messages`, `DELETE /mcp`, and `/health`.
-- Bearer authentication (`tsql_mcp_*`), batch requests, notifications (HTTP 202), and MCP error codes.
+- Bearer authentication (`hysql_mcp_*`), batch requests, notifications (HTTP 202), and MCP error codes.
 - Six tools with JSON Schemas: `list_databases`, `inspect_schema`, `read_query`, `write_query`, `execute_ddl`, `get_connection_bundle`.
-- Resources: `tailsql://databases` and `tailsql://databases/<name>/schema`; `prompts/list` compatibility.
+- Resources: `hysql://databases` and `hysql://databases/<name>/schema`; `prompts/list` compatibility.
 - `app_agent.go`: MCP backend adapter enforcing Read-Only mode and auto-checkpointing before `DROP`/`TRUNCATE`/`ALTER`; emits realtime events for workbench/table-editor refresh.
-- `cmd/tailsql-mcp`: stdio ↔ HTTP bridge.
+- `cmd/hysql-mcp`: stdio ↔ HTTP bridge.
 - UI: new **Connect to AI** tab with MCP toggle, port, Tailnet bind, token rotate/copy, Agent Safe Mode toggles, REST controls, Windsurf/Cursor/Claude configs, env snippet, and a generated live-schema agent prompt.
 
 **Verification**
@@ -73,7 +73,7 @@ Chronological record of v0.3.0 implementation. Newest entries are appended at th
 - Filters `eq|neq|gt|gte|lt|lte|like|is.null|is.notnull`, ordering, validated pagination, total count.
 - Metadata whitelist (case-insensitive) + quoted identifiers + `?` parameters from the new bridge `query` mode.
 - Type-aware JSON conversion (numbers, booleans, nulls).
-- CORS for all responses; `X-TailSQL-Key`/Bearer auth; public unauthenticated GET option.
+- CORS for all responses; `X-HySQL-Key`/Bearer auth; public unauthenticated GET option.
 - `internal/tailscale/funnel_http.go`: HTTPS Funnel enable/disable for the loopback HTTP port.
 - App wiring: REST server lifecycle, Tailnet bind, Funnel exposure, API key rotation, `agent:state` events.
 - UI: Overview `RestApiCard` (gateway toggle, Tailnet, Funnel, base URL copy) and full REST controls in Connect to AI.
@@ -109,24 +109,24 @@ Chronological record of v0.3.0 implementation. Newest entries are appended at th
 ```text
 go test ./...                     # pass
 go vet ./...                      # pass
-TAILSQL_INTEGRATION=1 go test ./internal/sqlrunner -run TestTableDataIntegration
+HYSQL_INTEGRATION=1 go test ./internal/sqlrunner -run TestTableDataIntegration
   # pass: prepared queries, FK/index metadata, online backup + restore
-TAILSQL_INTEGRATION=1 go test . -run TestAgentGatewaysIntegration
+HYSQL_INTEGRATION=1 go test . -run TestAgentGatewaysIntegration
   # pass: MCP initialize/tools/resources, REST auth/list/insert/OpenAPI, checkpoint creation
 npm run build                     # pass (tsc + Vite)
-scripts/build.ps1                 # pass; TailSQL.exe + TailSQL-0.3.0.exe
+scripts/build.ps1                 # pass; HySQL.exe + HySQL-0.3.0.exe
 ```
 
 **Build outputs**
 
-- `build/bin/TailSQL.exe`
-- `build/bin/TailSQL-0.3.0.exe`
+- `build/bin/HySQL.exe`
+- `build/bin/HySQL-0.3.0.exe`
 - Version bumped to `0.3.0` in `app.go`, `wails.json`, `frontend/package.json`, and the NSIS default.
 
 **Notes**
 
 - MCP and REST default to disabled and loopback-only. Enabling Tailnet/Funnel requires explicit UI toggles and Tailscale connectivity.
-- The `tailsql-mcp` stdio bridge is built by `go build ./cmd/tailsql-mcp`.
+- The `hysql-mcp` stdio bridge is built by `go build ./cmd/hysql-mcp`.
 
 ---
 
@@ -142,5 +142,41 @@ scripts/build.ps1                 # pass; TailSQL.exe + TailSQL-0.3.0.exe
 
 - Integration test now creates `IDENTITY_ITEMS(ID BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY, NAME ...)`, inserts `ID = 1` explicitly, seeds five rows, and asserts `COUNT(*) = 6`, `COUNT(DISTINCT ID) = 6`, and `MAX(ID) = 6`.
 - `go test ./...`, `go vet ./...`, and the MCP/REST integration suite pass.
+
+---
+
+## 2026-11-13 — Rebrand: TailSQL → HySQL
+
+**Scope:** Full product rename across the desktop app, Go module, CLI/MCP bridge, installer, frontend, website, and documentation. External repo and GitHub Pages links now target `github.com/GodfatherTHR/hysql` and `godfatherthr.github.io/hysql/`.
+
+**Implementation**
+
+- Go module renamed from `tailsql` to `hysql`; every internal import updated (`hysql/internal/...`).
+- Binaries and install artifacts renamed: `HySQL.exe`, `HySQL-<version>.exe`, `hysql-mcp.exe`, `HySQL-Setup-<version>.exe`, `%ProgramFiles%\HySQL`, Start Menu/registry keys `HySQL`.
+- MCP stdio bridge moved from `cmd/tailsql-mcp` to `cmd/hysql-mcp`.
+- Token prefixes changed to `hysql_mcp_*` / `hysql_rest_*`; REST header is now `X-HySQL-Key`; MCP server name/resource URIs use `hysql`. Existing persisted token values remain valid.
+- Environment variables renamed (`TAILSQL_*` → `HYSQL_*`), including `HYSQL_INTEGRATION`, `HYSQL_DOWNLOAD_TEST`, `HYSQL_WEBVIEW_DATA`, and `HYSQL_MCP_TOKEN`.
+- Frontend workbench/table-editor localStorage keys moved to `hysql.*`.
+- Runtime data directory renamed to `~/.hysql`; `migrateLegacyDataDir` renames an existing `~/.tailsql` tree on first launch so databases, credentials, and checkpoints are preserved.
+- Regenerated `docs/assets/logo.png` with the HySQL wordmark; the gem mark, favicon, app icon, and sidebar artwork were already text-free.
+- README, website, PRD, architecture, MCP/REST spec, devlog, and session log updated to the new brand.
+
+**Verification**
+
+```text
+scripts/build-bridge.ps1          # pass (Java 11 target)
+go build ./...                    # pass
+go vet ./...                      # pass
+go test ./...                     # pass
+(cd frontend && npm run build)    # pass (tsc + Vite)
+scripts/build.ps1                 # pass; HySQL.exe + HySQL-0.3.0.exe + hysql-mcp.exe
+scripts/build-installer.ps1       # pass; dist/HySQL-Setup-0.3.0.exe
+```
+
+**Notes**
+
+- The GitHub repository and Pages site must be renamed to `hysql` for the new links and release download URLs to resolve.
+- A pre-existing TailSQL installation lives in its own `%ProgramFiles%\TailSQL` directory and is not upgraded in place; uninstall it after installing HySQL.
+- The gitignored local demo projects under `inventory-management/` and `todo-app/` still use the old `com.tailsql` packages and `TAILSQL_*` variables; they are outside the shipped project and were left untouched.
 
 

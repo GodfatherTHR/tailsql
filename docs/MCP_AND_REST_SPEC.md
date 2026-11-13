@@ -1,4 +1,4 @@
-# TailSQL v0.3 — MCP & Auto-REST Specification
+# HySQL v0.3 — MCP & Auto-REST Specification
 
 > Version: 1.0 — 2026-11-12
 
@@ -13,21 +13,21 @@
 | `/mcp` | `DELETE` | Close a session (returns 204) |
 | `/sse` | `GET` | Legacy SSE transport; first event is `endpoint` |
 | `/messages?sessionId=<id>` | `POST` | Legacy SSE request ingress |
-| `/health` | `GET` | `{ "ok": true, "server": "tailsql-mcp" }` |
+| `/health` | `GET` | `{ "ok": true, "server": "hysql-mcp" }` |
 
 Default bind: `127.0.0.1:9099`. Optional bind: Tailscale IPv4 on the same port.
-Authentication: `Authorization: Bearer tsql_mcp_<random>` when a token is configured.
+Authentication: `Authorization: Bearer hysql_mcp_<random>` when a token is configured.
 
 ### 1.2 JSON-RPC methods
 
 | Method | Notes |
 |---|---|
-| `initialize` | Returns protocolVersion, capabilities (`tools`, `resources`), serverInfo (`tailsql`, version) |
+| `initialize` | Returns protocolVersion, capabilities (`tools`, `resources`), serverInfo (`hysql`, version) |
 | `notifications/initialized` | Notification; HTTP 202, no body |
 | `ping` | Returns `{}` |
 | `tools/list` | Tool definitions with JSON Schema |
 | `tools/call` | `{ name, arguments }` → `{ content: [{type:"text", text}], isError }` + `structuredContent` |
-| `resources/list` | `tailsql://databases` and one schema resource per database |
+| `resources/list` | `hysql://databases` and one schema resource per database |
 | `resources/read` | Returns `application/json` contents |
 | `prompts/list` | Empty list (compatibility) |
 
@@ -112,8 +112,8 @@ Result fields: `database`, `jdbcUrls` (local/tailscale), `username`, `password`,
 
 ### 1.4 Resources
 
-- `tailsql://databases` — JSON array of databases and status.
-- `tailsql://databases/<name>/schema` — compact JSON schema for that database.
+- `hysql://databases` — JSON array of databases and status.
+- `hysql://databases/<name>/schema` — compact JSON schema for that database.
 
 ## 2. Auto-REST Gateway
 
@@ -153,8 +153,8 @@ Errors: `{ "error": { "code": "not_found|bad_request|unauthorized|forbidden|conf
 
 ### 2.5 Security
 
-- CORS: `Access-Control-Allow-Origin: *`, methods `GET,POST,PATCH,DELETE,OPTIONS`, headers `Content-Type,Authorization,X-TailSQL-Key`.
-- `X-TailSQL-Key: tsql_rest_<random>` or `Authorization: Bearer …` when exposed or when public read is off.
+- CORS: `Access-Control-Allow-Origin: *`, methods `GET,POST,PATCH,DELETE,OPTIONS`, headers `Content-Type,Authorization,X-HySQL-Key`.
+- `X-HySQL-Key: hysql_rest_<random>` or `Authorization: Bearer …` when exposed or when public read is off.
 - `AllowPublicRead`: unauthenticated `GET` only.
 - Every schema/table name is matched case-insensitively against the live metadata snapshot; identifiers are database-quoted, values use `?` parameters.
 
@@ -166,5 +166,5 @@ Generated from live metadata: one path per table/view, `get` for all, `post` for
 
 - Never bind `0.0.0.0`, `::`, or non-loop/non-CGNAT addresses.
 - MCP and REST servers default to loopback and stay there unless the user enables Tailnet/Funnel.
-- Tokens are generated locally, stored in `~/.tailsql/config.json` with `0600`, and can be rotated from the UI.
+- Tokens are generated locally, stored in `~/.hysql/config.json` with `0600`, and can be rotated from the UI.
 - Agent Read-Only mode blocks `write_query` and `execute_ddl` at the backend adapter, not only in the UI.

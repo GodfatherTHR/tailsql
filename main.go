@@ -19,12 +19,12 @@ var assets embed.FS
 func main() {
 	application := NewApp(appVersion)
 	windowsOptions := &windows.Options{}
-	if webviewData := os.Getenv("TAILSQL_WEBVIEW_DATA"); webviewData != "" {
+	if webviewData := os.Getenv("HYSQL_WEBVIEW_DATA"); webviewData != "" {
 		// Enables an isolated WebView2 profile for debugging and UI automation.
 		windowsOptions.WebviewUserDataPath = webviewData
 	}
 	err := wails.Run(&options.App{
-		Title:             "TailSQL",
+		Title:             "HySQL",
 		Width:             1480,
 		Height:            920,
 		MinWidth:          1180,

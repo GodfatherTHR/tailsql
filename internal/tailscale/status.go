@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 // Status is the UI-facing Tailscale health snapshot.
@@ -147,7 +147,7 @@ func resolveBinary(override string) (string, error) {
 			return candidate, nil
 		}
 	}
-	return "", errors.New("Tailscale CLI not found. Install Tailscale and ensure `tailscale` is on PATH, or set settings.tailscalePath in ~/.tailsql/instances.json")
+	return "", errors.New("Tailscale CLI not found. Install Tailscale and ensure `tailscale` is on PATH, or set settings.tailscalePath in ~/.hysql/instances.json")
 }
 
 func binaryCandidates() []string {

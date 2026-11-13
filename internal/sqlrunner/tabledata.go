@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 // Row page bounds protect the IPC boundary and the JVM bridge.

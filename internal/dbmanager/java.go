@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 // MinimumJavaMajor is the oldest runtime supported by the embedded bridge.
@@ -66,7 +66,7 @@ func DetectJava(override string) JavaInfo {
 	info.Version = match[1]
 	info.Major = parseJavaMajor(match[1])
 	if info.Major < MinimumJavaMajor {
-		info.Error = fmt.Sprintf("Java %s detected, but TailSQL requires Java %d or newer", info.Version, MinimumJavaMajor)
+		info.Error = fmt.Sprintf("Java %s detected, but HySQL requires Java %d or newer", info.Version, MinimumJavaMajor)
 		return info
 	}
 	info.Supported = true
@@ -95,7 +95,7 @@ func resolveJavaBinary(override string) (string, error) {
 	if found, err := exec.LookPath("java"); err == nil {
 		return found, nil
 	}
-	return "", errors.New("Java runtime not found. Install Java 11+ and ensure `java` is on PATH, or set settings.javaPath in ~/.tailsql/instances.json")
+	return "", errors.New("Java runtime not found. Install Java 11+ and ensure `java` is on PATH, or set settings.javaPath in ~/.hysql/instances.json")
 }
 
 func parseJavaMajor(version string) int {

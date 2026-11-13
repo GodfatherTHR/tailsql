@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"strings"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 //go:embed JdbcBridge*.class
@@ -301,9 +301,9 @@ func (b *Bridge) run(ctx context.Context, url, username, password, mode, input s
 		"JdbcBridge", mode,
 	)
 	cmd.Env = envWith(os.Environ(), map[string]string{
-		"TAILSQL_JDBC_URL":      url,
-		"TAILSQL_JDBC_USER":     username,
-		"TAILSQL_JDBC_PASSWORD": password,
+		"HYSQL_JDBC_URL":      url,
+		"HYSQL_JDBC_USER":     username,
+		"HYSQL_JDBC_PASSWORD": password,
 	})
 	cmd.Stdin = strings.NewReader(input)
 

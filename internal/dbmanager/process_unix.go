@@ -11,7 +11,7 @@ import (
 	"strings"
 	"syscall"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 func processExists(pid int) bool {

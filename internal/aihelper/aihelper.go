@@ -1,4 +1,4 @@
-// Package aihelper adds optional schema-aware LLM assistance to TailSQL.
+// Package aihelper adds optional schema-aware LLM assistance to HySQL.
 package aihelper
 
 import (
@@ -341,8 +341,8 @@ func chat(ctx context.Context, settings Settings, system, user string) (string, 
 		request.Header.Set("Authorization", "Bearer "+settings.APIKey)
 	}
 	if settings.Provider == ProviderOpenRouter {
-		request.Header.Set("HTTP-Referer", "https://github.com/GodfatherTHR/tailsql")
-		request.Header.Set("X-Title", "TailSQL")
+		request.Header.Set("HTTP-Referer", "https://github.com/GodfatherTHR/hysql")
+		request.Header.Set("X-Title", "HySQL")
 	}
 
 	response, err := client.Do(request)

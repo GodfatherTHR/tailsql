@@ -27,4 +27,4 @@ if [[ -f assets/h2.jar.sha256 ]]; then
 fi
 popd >/dev/null
 
-echo "Build complete: $ROOT/build/bin/TailSQL"
+echo "Build complete: $ROOT/build/bin/HySQL"

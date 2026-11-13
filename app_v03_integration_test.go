@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/dbmanager"
-	"tailsql/internal/mcp"
-	"tailsql/internal/restapi"
-	"tailsql/internal/snapshots"
-	"tailsql/internal/sqlrunner"
+	"hysql/internal/config"
+	"hysql/internal/dbmanager"
+	"hysql/internal/mcp"
+	"hysql/internal/restapi"
+	"hysql/internal/snapshots"
+	"hysql/internal/sqlrunner"
 )
 
 func freePort(t *testing.T) int {
@@ -31,8 +31,8 @@ func freePort(t *testing.T) int {
 }
 
 func TestAgentGatewaysIntegration(t *testing.T) {
-	if os.Getenv("TAILSQL_INTEGRATION") != "1" {
-		t.Skip("set TAILSQL_INTEGRATION=1 to run real-H2 MCP/REST tests")
+	if os.Getenv("HYSQL_INTEGRATION") != "1" {
+		t.Skip("set HYSQL_INTEGRATION=1 to run real-H2 MCP/REST tests")
 	}
 	assets, err := filepath.Abs("assets")
 	if err != nil {
@@ -146,7 +146,7 @@ func TestAgentGatewaysIntegration(t *testing.T) {
 	// MCP: initialize, list databases, inspect schema, read rows.
 	initialize := postMCP(t, mcpPort, current.MCPToken,
 		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}`)
-	if !strings.Contains(initialize, "tailsql") {
+	if !strings.Contains(initialize, "hysql") {
 		t.Fatalf("unexpected initialize response: %s", initialize)
 	}
 	list := postMCP(t, mcpPort, current.MCPToken,
@@ -273,7 +273,7 @@ func restCall(t *testing.T, method, url, key, body string) string {
 		t.Fatalf("build REST request: %v", err)
 	}
 	if key != "" {
-		request.Header.Set("X-TailSQL-Key", key)
+		request.Header.Set("X-HySQL-Key", key)
 	}
 	if body != "" {
 		request.Header.Set("Content-Type", "application/json")
@@ -301,7 +301,7 @@ func restCallStatus(t *testing.T, method, url, key, body string) int {
 		t.Fatalf("build REST request: %v", err)
 	}
 	if key != "" {
-		request.Header.Set("X-TailSQL-Key", key)
+		request.Header.Set("X-HySQL-Key", key)
 	}
 	client := &http.Client{Timeout: 30 * time.Second}
 	response, err := client.Do(request)

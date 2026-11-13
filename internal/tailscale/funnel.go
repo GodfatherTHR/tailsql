@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 // FunnelAllowedPorts are the only ports Tailscale Funnel accepts.

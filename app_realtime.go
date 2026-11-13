@@ -8,18 +8,18 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/config"
+	"hysql/internal/config"
 )
 
 const (
 	realtimePollInterval = time.Second
-	// Writes made through TailSQL update the H2 file too. A short echo window
+	// Writes made through HySQL update the H2 file too. A short echo window
 	// keeps the file watcher from emitting a duplicate "external" event.
 	realtimeEchoWindow = 2 * time.Second
 )
 
 // RealtimeChangeEvent is pushed to the frontend whenever a database changes,
-// either through TailSQL or through another JDBC client.
+// either through HySQL or through another JDBC client.
 type RealtimeChangeEvent struct {
 	InstanceID  string `json:"instanceId"`
 	Schema      string `json:"schema,omitempty"`
@@ -137,7 +137,7 @@ func (a *App) emitRealtimeChange(event RealtimeChangeEvent) {
 		event.At = time.Now().UTC().Format(time.RFC3339Nano)
 	}
 	if event.Source == "" {
-		event.Source = "tailsql"
+		event.Source = "hysql"
 	}
 	if event.Operation != "external" {
 		a.markDatabaseActivity(event.InstanceID)
@@ -145,7 +145,7 @@ func (a *App) emitRealtimeChange(event RealtimeChangeEvent) {
 	a.emit("realtime:change", event)
 }
 
-// markDatabaseActivity records that TailSQL itself just used the database. H2
+// markDatabaseActivity records that HySQL itself just used the database. H2
 // rewrites the .mv.db file when a database is opened and closed, even for a
 // plain SELECT, so without this a table read would look like an external
 // change and immediately trigger another read.

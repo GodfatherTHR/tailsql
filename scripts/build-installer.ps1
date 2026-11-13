@@ -11,9 +11,9 @@ if (-not $Version) {
     $Version = $wails.info.productVersion
 }
 
-$versionedExe = Join-Path $root "build\bin\TailSQL-$Version.exe"
+$versionedExe = Join-Path $root "build\bin\HySQL-$Version.exe"
 if (-not (Test-Path $versionedExe)) {
-    $plainExe = Join-Path $root "build\bin\TailSQL.exe"
+    $plainExe = Join-Path $root "build\bin\HySQL.exe"
     if (-not (Test-Path $plainExe)) {
         throw "Build first: neither $versionedExe nor $plainExe exists."
     }
@@ -52,7 +52,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "makensis failed with exit code $LASTEXITCODE"
 }
 
-$setup = Join-Path $root "dist\TailSQL-Setup-$Version.exe"
+$setup = Join-Path $root "dist\HySQL-Setup-$Version.exe"
 if (-not (Test-Path $setup)) {
     throw "Installer output was not created: $setup"
 }

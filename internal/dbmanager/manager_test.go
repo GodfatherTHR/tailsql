@@ -161,8 +161,8 @@ func TestValidatePort(t *testing.T) {
 }
 
 func TestDownloadH2Integration(t *testing.T) {
-	if os.Getenv("TAILSQL_DOWNLOAD_TEST") != "1" {
-		t.Skip("set TAILSQL_DOWNLOAD_TEST=1 to exercise the H2 downloader")
+	if os.Getenv("HYSQL_DOWNLOAD_TEST") != "1" {
+		t.Skip("set HYSQL_DOWNLOAD_TEST=1 to exercise the H2 downloader")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()

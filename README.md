@@ -1,32 +1,36 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="TailSQL logo" width="200">
+  <img src="docs/assets/logo.png" alt="HySQL logo" width="200">
 </p>
 
-# TailSQL
+# HySQL
 
 <p align="center">
-  <a href="https://github.com/GodfatherTHR/tailsql/releases/latest"><strong>Download for Windows</strong></a>
+  <a href="https://github.com/GodfatherTHR/hysql/releases/latest"><strong>Download for Windows</strong></a>
   &middot;
-  <a href="https://godfatherthr.github.io/tailsql/">Website</a>
+  <a href="https://godfatherthr.github.io/hysql/">Website</a>
   &middot;
-  <a href="https://godfatherthr.github.io/tailsql/docs.html">Documentation</a>
+  <a href="https://godfatherthr.github.io/hysql/docs.html">Documentation</a>
 </p>
 
 Local-first H2 database manager with a table editor, SQL workbench, Tailscale hosting, public Funnel support, generated Java (JDBC) code, a built-in MCP server for AI coding agents, an Auto-REST gateway, checkpoints, and optional LLM SQL assistance.
 
-TailSQL runs H2 as a loopback-only TCP server, exposes it to your tailnet through a Go L4 proxy when you opt in, and produces copy-paste Maven, Gradle, HikariCP, Spring Boot, and raw JDBC snippets matching the selected connection mode. In v0.3.0 it also lets Windsurf, Cursor, Claude Code, or any MCP client inspect schemas, run queries, seed data, and fetch connection bundles — while browser apps talk to the same database through a generated REST/JSON API.
+HySQL runs H2 as a loopback-only TCP server, exposes it to your tailnet through a Go L4 proxy when you opt in, and produces copy-paste Maven, Gradle, HikariCP, Spring Boot, and raw JDBC snippets matching the selected connection mode. In v0.3.0 it also lets Windsurf, Cursor, Claude Code, or any MCP client inspect schemas, run queries, seed data, and fetch connection bundles — while browser apps talk to the same database through a generated REST/JSON API.
 
 > **Verification status:** v0.3.0 is implemented and locally verified. Go unit and real-H2 integration tests cover the lifecycle, table editor, prepared statements, foreign-key/index metadata, online backup/restore, MCP tools over HTTP, REST auth/list/insert/OpenAPI, and checkpoint creation. The frontend production build and Wails build pass. The only unexercised path is a live remote Tailscale peer and a live public Funnel mapping; proxy forwarding/metrics are covered by a loopback test, and Funnel status/URL logic is unit tested.
 
 ## Install on Windows
 
-Download `TailSQL-Setup-0.3.0.exe` from [GitHub Releases](https://github.com/GodfatherTHR/tailsql/releases/latest).
+Download `HySQL-Setup-0.3.0.exe` from [GitHub Releases](https://github.com/GodfatherTHR/hysql/releases/latest).
 
 1. Run the installer. Windows SmartScreen may ask you to confirm because the installer is unsigned.
-2. Launch TailSQL from the Start Menu or the desktop shortcut.
+2. Launch HySQL from the Start Menu or the desktop shortcut.
 3. Select **New database** and follow the setup.
 
 The installer includes the pinned H2 engine. Java 11 or newer is required. Tailscale is optional and is needed only for tailnet or public Funnel hosting.
+
+### Upgrading from TailSQL
+
+HySQL is a direct rename of TailSQL. On first launch it moves an existing `~/.tailsql` data directory to `~/.hysql`, so databases, credentials, checkpoints, and preferences carry over automatically. A TailSQL installation under `%ProgramFiles%\TailSQL` is not upgraded in place; uninstall it after installing HySQL. Environment variables now use the `HYSQL_` prefix, and newly generated MCP/REST tokens use `hysql_`; previously saved token values keep working.
 
 ## What it does
 
@@ -40,7 +44,7 @@ The installer includes the pinned H2 engine. Java 11 or newer is required. Tails
 - **Connect to AI:** one-click MCP server on `127.0.0.1:9099` with Bearer auth, optional Tailnet bind, copy-ready Windsurf/Cursor/Claude configs, and a generated system prompt containing live schema, JDBC URLs, and REST keys. Tools: `list_databases`, `inspect_schema`, `read_query`, `write_query`, `execute_ddl`, `get_connection_bundle`.
 - **Agent safe mode:** read-only mode for agents and automatic `Pre-Agent DDL` checkpoints before `DROP`/`TRUNCATE`/`ALTER`.
 - **Auto-REST gateway:** `/api/v1/<db>/<schema>/<table>` CRUD for tables, read-only views, filters, pagination, CORS, API key/Bearer auth, and OpenAPI 3.0 at `/api/v1/<db>/openapi.json`; bind loopback, Tailnet, or public HTTPS Funnel.
-- **Checkpoints:** consistent `.mv.db` snapshots under `~/.tailsql/snapshots`, create/restore/delete from the database header, same-port restart with Tailscale/Funnel re-enabled.
+- **Checkpoints:** consistent `.mv.db` snapshots under `~/.hysql/snapshots`, create/restore/delete from the database header, same-port restart with Tailscale/Funnel re-enabled.
 - **AI SQL + mock data:** schema-aware natural-language-to-H2 SQL in the workbench and a 10/50-row seeder in the table editor using local Ollama or OpenRouter/OpenAI-compatible APIs, with a deterministic offline fallback.
 - Recover cleanly from app crashes by validating and adopting (or cleaning) persisted H2 PIDs. Orphan H2 servers that still hold a database file but were never persisted are found by command line, adopted if healthy, or terminated if wedged.
 
@@ -75,9 +79,9 @@ Production build (copies `h2.jar` next to the executable and creates a versioned
 
 ```powershell
 scripts/build.ps1
-build/bin/TailSQL.exe
-build/bin/TailSQL-0.3.0.exe
-build/bin/tailsql-mcp.exe
+build/bin/HySQL.exe
+build/bin/HySQL-0.3.0.exe
+build/bin/hysql-mcp.exe
 ```
 
 Windows installer (requires NSIS):
@@ -88,7 +92,7 @@ scripts/build-installer.ps1
 scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"
 ```
 
-The installer is written to `dist/TailSQL-Setup-<version>.exe`.
+The installer is written to `dist/HySQL-Setup-<version>.exe`.
 
 macOS/Linux:
 
@@ -105,12 +109,12 @@ wails dev
 
 If you run `wails build` directly instead of the scripts, copy `assets/h2.jar` into `build/bin/assets/` afterward, or use the in-app **Download H2** action.
 
-If the H2 jar is not present at runtime, the UI offers a **Download H2** action that installs the pinned engine into `~/.tailsql/assets/h2.jar`.
+If the H2 jar is not present at runtime, the UI offers a **Download H2** action that installs the pinned engine into `~/.hysql/assets/h2.jar`.
 
 ## Runtime data
 
 ```
-~/.tailsql/
+~/.hysql/
 ├── instances.json        # schema-versioned instance state (0600)
 ├── dbs/<name>.mv.db      # H2 database files
 ├── logs/<id>.log         # H2 server output
@@ -130,7 +134,7 @@ Database metadata includes credentials in local JSON for the MVP. Tailscale ACLs
 - **Crash recovery** compares persisted PIDs against Java process images, the stored H2 command line (when available), and listening ports before adopting or cleaning them.
 - **IPC** exposes typed Go DTOs through Wails; the React app consumes them through a typed facade in `src/lib/api.ts`. Generated bindings live in `frontend/wailsjs/`.
 
-See the [TailSQL documentation](https://godfatherthr.github.io/tailsql/docs.html) for setup, usage, sharing, security, and troubleshooting.
+See the [HySQL documentation](https://godfatherthr.github.io/hysql/docs.html) for setup, usage, sharing, security, and troubleshooting.
 
 ## Tests
 
@@ -143,14 +147,14 @@ go vet ./...
 Real-H2 integration tests are opt-in:
 
 ```powershell
-$env:TAILSQL_INTEGRATION = "1"
+$env:HYSQL_INTEGRATION = "1"
 go test ./internal/dbmanager -run Integration -v
 ```
 
 They cover create → start → SQL → metadata → stop, persisted-PID orphan adoption, and untracked H2 orphan adoption. The table editor also has an opt-in real-H2 test:
 
 ```powershell
-$env:TAILSQL_INTEGRATION = "1"
+$env:HYSQL_INTEGRATION = "1"
 go test ./internal/sqlrunner -run TestTableDataIntegration -v
 ```
 
@@ -159,7 +163,7 @@ It exercises insert, pagination, NULL handling, escaped literals, primary-key up
 The H2 engine downloader is also opt-in:
 
 ```powershell
-$env:TAILSQL_DOWNLOAD_TEST = "1"
+$env:HYSQL_DOWNLOAD_TEST = "1"
 go test ./internal/dbmanager -run TestDownloadH2Integration -v
 ```
 
@@ -177,7 +181,7 @@ and executed against a live H2 server. Both printed `SELECT 1 -> 1`.
 
 ### Isolated UI debugging
 
-`TAILSQL_WEBVIEW_DATA` can point WebView2 at a separate user-data directory, which is useful for running a second isolated instance or UI automation without disturbing the primary profile. It has no effect when unset.
+`HYSQL_WEBVIEW_DATA` can point WebView2 at a separate user-data directory, which is useful for running a second isolated instance or UI automation without disturbing the primary profile. It has no effect when unset.
 
 ## MVP limitations
 

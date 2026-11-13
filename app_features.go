@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/mcp"
-	"tailsql/internal/restapi"
-	"tailsql/internal/sqlrunner"
-	"tailsql/internal/tailscale"
+	"hysql/internal/config"
+	"hysql/internal/mcp"
+	"hysql/internal/restapi"
+	"hysql/internal/sqlrunner"
+	"hysql/internal/tailscale"
 )
 
 func (a *App) preferences() (*config.PreferencesStore, bool) {
@@ -433,8 +433,8 @@ func (a *App) buildSystemPrompt(mcpView MCPStateView, restView RESTStateView, sa
 		restBase = fmt.Sprintf("http://127.0.0.1:%d", restView.Port)
 	}
 	var builder strings.Builder
-	builder.WriteString("# TailSQL agent context\n\n")
-	builder.WriteString("You have access to live H2 databases through the TailSQL MCP server.\n\n")
+	builder.WriteString("# HySQL agent context\n\n")
+	builder.WriteString("You have access to live H2 databases through the HySQL MCP server.\n\n")
 	builder.WriteString("- MCP endpoint: " + endpoint + "\n")
 	builder.WriteString("- Authorization: Bearer " + mcpView.Token + "\n")
 	builder.WriteString("- Auto-REST base: " + restBase + "/api/v1/<database>/<schema>/<table>\n")
@@ -445,14 +445,14 @@ func (a *App) buildSystemPrompt(mcpView MCPStateView, restView RESTStateView, sa
 	builder.WriteString("2. Call `inspect_schema` before writing SQL so you use real tables and columns.\n")
 	builder.WriteString("3. Use `read_query` for SELECTs, `write_query` for DML, and `execute_ddl` for schema changes.\n")
 	builder.WriteString("4. Call `get_connection_bundle` when building an application; it returns JDBC credentials, HikariCP/Spring snippets, and the REST API key.\n")
-	builder.WriteString("5. For browser apps, use the Auto-REST gateway with `X-TailSQL-Key`; for Java/Spring, use the JDBC bundle.\n\n")
+	builder.WriteString("5. For browser apps, use the Auto-REST gateway with `X-HySQL-Key`; for Java/Spring, use the JDBC bundle.\n\n")
 	builder.WriteString("## Building an app against this database\n")
-	builder.WriteString("- REST is CORS-enabled for local and deployed frontends; send `X-TailSQL-Key` (or `Authorization: Bearer <rest key>`).\n")
+	builder.WriteString("- REST is CORS-enabled for local and deployed frontends; send `X-HySQL-Key` (or `Authorization: Bearer <rest key>`).\n")
 	builder.WriteString("- Read the generated contract first: `GET <rest base>/api/v1/<database>/openapi.json`.\n")
 	builder.WriteString("- List rows: `GET <rest base>/api/v1/<database>/<schema>/<table>?limit=50&offset=0&order=<pk>.desc`.\n")
 	builder.WriteString("- Insert: `POST <rest base>/api/v1/<database>/<schema>/<table>` with a JSON object (or array).\n")
 	builder.WriteString("- Update/delete by primary key: `PATCH|DELETE <rest base>/api/v1/<database>/<schema>/<table>/<pk>`.\n")
-	builder.WriteString("- Example: `curl -s -H \"X-TailSQL-Key: " + restView.APIKey + "\" \"" + restBase + "/api/v1/<database>/<schema>/<table>?limit=5\"`.\n")
+	builder.WriteString("- Example: `curl -s -H \"X-HySQL-Key: " + restView.APIKey + "\" \"" + restBase + "/api/v1/<database>/<schema>/<table>?limit=5\"`.\n")
 	builder.WriteString("- Use the exact schema-qualified names from the schema section below; identifiers are case-insensitive in the REST path but SQL must quote names when needed.\n\n")
 	builder.WriteString("## Live databases and schema\n")
 	builder.WriteString(a.schemaSummary())
@@ -467,7 +467,7 @@ func (a *App) schemaSummary() string {
 	}
 	instances := manager.List()
 	if len(instances) == 0 {
-		return "No databases are available. Create one in TailSQL first."
+		return "No databases are available. Create one in HySQL first."
 	}
 	var builder strings.Builder
 	builder.WriteString("Use the exact schema-qualified names below; never invent columns.\n\n")
@@ -541,7 +541,7 @@ func buildAgentSnippets(mcpView MCPStateView, restView RESTStateView) map[string
 	token := mcpView.Token
 	windsurf := fmt.Sprintf(`{
   "mcpServers": {
-    "tailsql": {
+    "hysql": {
       "serverUrl": %q,
       "headers": {
         "Authorization": "Bearer %s"
@@ -551,7 +551,7 @@ func buildAgentSnippets(mcpView MCPStateView, restView RESTStateView) map[string
 }`, endpoint, token)
 	cursor := fmt.Sprintf(`{
   "mcpServers": {
-    "tailsql": {
+    "hysql": {
       "url": %q,
       "headers": {
         "Authorization": "Bearer %s"
@@ -561,7 +561,7 @@ func buildAgentSnippets(mcpView MCPStateView, restView RESTStateView) map[string
 }`, endpoint, token)
 	claude := fmt.Sprintf(`{
   "mcpServers": {
-    "tailsql": {
+    "hysql": {
       "command": "npx",
       "args": [
         "-y",
@@ -577,7 +577,7 @@ func buildAgentSnippets(mcpView MCPStateView, restView RESTStateView) map[string
 	if restBase == "" {
 		restBase = fmt.Sprintf("http://127.0.0.1:%d", restView.Port)
 	}
-	env := fmt.Sprintf("# TailSQL\nTAILSQL_MCP_URL=%s\nTAILSQL_MCP_TOKEN=%s\nTAILSQL_REST_BASE=%s/api/v1\nTAILSQL_REST_KEY=%s",
+	env := fmt.Sprintf("# HySQL\nHYSQL_MCP_URL=%s\nHYSQL_MCP_TOKEN=%s\nHYSQL_REST_BASE=%s/api/v1\nHYSQL_REST_KEY=%s",
 		endpoint, token, restBase, restView.APIKey)
 	return map[string]string{
 		"windsurf":    windsurf,

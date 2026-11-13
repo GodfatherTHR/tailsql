@@ -40,7 +40,7 @@ export function EmptyState({ canCreate, javaIssue, onCreate }: EmptyStateProps) 
               Your local H2 lab, one toggle from your team.
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-400">
-              TailSQL runs H2 as a loopback-only TCP server, exposes it over your Tailscale
+              HySQL runs H2 as a loopback-only TCP server, exposes it over your Tailscale
               interface when you ask, and generates the Java code your service actually needs.
             </p>
 

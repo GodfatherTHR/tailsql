@@ -87,13 +87,13 @@ export default function App() {
     try {
       if (!window.go?.main?.App) {
         throw new Error(
-          'TailSQL desktop runtime was not detected. Launch the app through Wails (`wails dev`) or the packaged binary.',
+          'HySQL desktop runtime was not detected. Launch the app through Wails (`wails dev`) or the packaged binary.',
         );
       }
       const systemHealth = await api.getSystemHealth();
       setHealth(systemHealth);
       if (!systemHealth.initialized) {
-        setFatal(systemHealth.error || 'The TailSQL backend failed to initialize.');
+        setFatal(systemHealth.error || 'The HySQL backend failed to initialize.');
         return;
       }
       const list = await api.listInstances();
@@ -693,7 +693,7 @@ export default function App() {
         title="Remove database"
         description={
           deleteTarget
-            ? `Remove "${deleteTarget.name}" from TailSQL? The H2 server is stopped first, but the database file ${deleteTarget.databaseFile} stays in ~/.tailsql/dbs.`
+            ? `Remove "${deleteTarget.name}" from HySQL? The H2 server is stopped first, but the database file ${deleteTarget.databaseFile} stays in ~/.hysql/dbs.`
             : ''
         }
         confirmLabel="Remove database"
@@ -749,10 +749,10 @@ function FatalPanel({ message, onRetry }: { message: string; onRetry: () => void
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/[0.08]">
           <AlertTriangle size={22} className="text-rose-300" />
         </div>
-        <h1 className="text-lg font-semibold text-slate-100">TailSQL could not start</h1>
+        <h1 className="text-lg font-semibold text-slate-100">HySQL could not start</h1>
         <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-slate-500">{message}</p>
         <p className="mt-3 text-[11px] leading-relaxed text-slate-600">
-          Check permissions on <span className="font-mono">~/.tailsql</span>, then retry. Local
+          Check permissions on <span className="font-mono">~/.hysql</span>, then retry. Local
           features require Java 11+ and the H2 engine jar.
         </p>
         <button type="button" className="btn-primary mt-6" onClick={onRetry}>

@@ -1,5 +1,5 @@
 // Package codegen renders ready-to-run Java connectivity artifacts for a
-// TailSQL instance in either local or Tailscale mode.
+// HySQL instance in either local or Tailscale mode.
 package codegen
 
 import (
@@ -104,7 +104,7 @@ func Generate(request Request) Artifacts {
 
 func validate(request Request) error {
 	if !databaseNamePattern.MatchString(request.Database) {
-		return fmt.Errorf("database name %q is not a valid TailSQL slug", request.Database)
+		return fmt.Errorf("database name %q is not a valid HySQL slug", request.Database)
 	}
 	if strings.TrimSpace(request.Username) == "" {
 		return fmt.Errorf("username is required")
@@ -143,7 +143,7 @@ func isTailscaleIPv4(ip net.IP) bool {
 }
 
 func renderMaven(request Request) string {
-	return fmt.Sprintf(`<!-- TailSQL — H2 + HikariCP for %s (%s mode) -->
+	return fmt.Sprintf(`<!-- HySQL — H2 + HikariCP for %s (%s mode) -->
 <!-- Java 11+ required (Java 17/21 recommended). -->
 <dependencies>
     <dependency>
@@ -167,7 +167,7 @@ func renderMaven(request Request) string {
 }
 
 func renderGradle(request Request) string {
-	return fmt.Sprintf(`// TailSQL — H2 + HikariCP for %s (%s mode)
+	return fmt.Sprintf(`// HySQL — H2 + HikariCP for %s (%s mode)
 // Java 11+ required (Java 17/21 recommended).
 dependencies {
     implementation 'com.h2database:h2:%s'
@@ -190,7 +190,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 /**
- * TailSQL connection pool for "%s" (%s mode).
+ * HySQL connection pool for "%s" (%s mode).
  * JDBC URL: %s%s
  *
  * Run main() to verify connectivity before using the pool in your service.
@@ -218,7 +218,7 @@ public final class DatabaseConfig {
         config.setIdleTimeout(60_000);
         config.setMaxLifetime(300_000);
         config.setInitializationFailTimeout(5_000);
-        config.setPoolName("tailsql-%s");
+        config.setPoolName("hysql-%s");
 
         return new HikariDataSource(config);
     }
@@ -229,7 +229,7 @@ public final class DatabaseConfig {
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT 1")) {
             rs.next();
-            System.out.println("Connected through TailSQL (HikariCP): SELECT 1 -> " + rs.getInt(1));
+            System.out.println("Connected through HySQL (HikariCP): SELECT 1 -> " + rs.getInt(1));
         }
     }
 }
@@ -239,7 +239,7 @@ public final class DatabaseConfig {
 }
 
 func renderSpringProperties(request Request, jdbcURL string) string {
-	return fmt.Sprintf(`# TailSQL — %s (%s mode)
+	return fmt.Sprintf(`# HySQL — %s (%s mode)
 spring.datasource.url=%s
 spring.datasource.username=%s
 spring.datasource.password=%s
@@ -255,7 +255,7 @@ func renderSpringYAML(request Request, jdbcURL, magicDNS string) string {
 	if magicDNS != "" {
 		magicDNSComment = fmt.Sprintf("\n# MagicDNS alternative: jdbc:h2:tcp://%s:%d/./%s", magicDNS, request.Port, request.Database)
 	}
-	return fmt.Sprintf(`# TailSQL — %s (%s mode)
+	return fmt.Sprintf(`# HySQL — %s (%s mode)
 spring:
   datasource:
     url: %s
@@ -280,7 +280,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 /**
- * Minimal TailSQL connectivity check for "%s" (%s mode).
+ * Minimal HySQL connectivity check for "%s" (%s mode).
  * JDBC URL: %s%s
  */
 public class JdbcTest {
@@ -294,7 +294,7 @@ public class JdbcTest {
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT 1")) {
             rs.next();
-            System.out.println("Connected to H2 through TailSQL: SELECT 1 -> " + rs.getInt(1));
+            System.out.println("Connected to H2 through HySQL: SELECT 1 -> " + rs.getInt(1));
         }
     }
 }
@@ -410,7 +410,7 @@ func yamlQuote(value string) string {
 func poolName(database string) string {
 	name := strings.NewReplacer("_", "-", " ", "-").Replace(database)
 	if name == "" {
-		return "tailsql"
+		return "hysql"
 	}
 	return name
 }

@@ -1,6 +1,6 @@
-# TailSQL — Product Requirements & Roadmap (v0.3.0)
+# HySQL — Product Requirements & Roadmap (v0.3.0)
 
-> **Product:** TailSQL — a local-first H2 database manager for Java developers and AI coding agents, with one-click Tailscale sharing, generated JDBC code, an embedded MCP server, and an auto-generated REST gateway.
+> **Product:** HySQL — a local-first H2 database manager for Java developers and AI coding agents, with one-click Tailscale sharing, generated JDBC code, an embedded MCP server, and an auto-generated REST gateway.
 >
 > **Status:** v0.2.1 shipped. v0.3.0 implemented and verified.
 > **Last updated:** 2026-11-12
@@ -16,13 +16,13 @@ H2 is the fastest way to get a real relational database running locally, but it 
 3. Agents and remote teammates mutate schemas. Users need one-click checkpoints and rollback.
 4. Writing correct H2 SQL and realistic seed data is repetitive. Users want optional local/remote LLM assistance.
 
-TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experience (H2 lifecycle, Tailscale L4 proxy, Funnel TCP, Java codegen, SQL workbench, table editor).
+HySQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experience (H2 lifecycle, Tailscale L4 proxy, Funnel TCP, Java codegen, SQL workbench, table editor).
 
 ## 2. Personas
 
 | Persona | Need | Success signal |
 |---|---|---|
-| AI-assisted developer | Point Cursor/Windsurf/Claude Code at TailSQL and let the agent inspect schema, query, and seed data | Agent lists databases and runs a `SELECT` on the first attempt using the copied MCP config |
+| AI-assisted developer | Point Cursor/Windsurf/Claude Code at HySQL and let the agent inspect schema, query, and seed data | Agent lists databases and runs a `SELECT` on the first attempt using the copied MCP config |
 | Frontend developer | Build a React/Next.js app against a local H2 database | Copies the Auto-REST base URL and fetches `GET /api/v1/inven_db/INVENTORY/PRODUCTS` successfully in minutes |
 | Backend Java developer | A real H2 TCP endpoint + generated Spring Boot code | Copies generated JDBC URL and pool code and connects on the first try |
 | Team lead | Share a database through Tailscale/Funnel safely | Enables Tailnet/Funnel REST with an API key, sends only an HTTPS URL + key |
@@ -33,7 +33,7 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 - **G1 — MCP server:** Built-in JSON-RPC 2.0 MCP server on `127.0.0.1:9099` (configurable) with optional Tailnet bind and Bearer token, exposing six tools and resources.
 - **G2 — Connect to AI UI:** One tab with server toggles, Agent Safe Mode, copy-ready Windsurf/Cursor/Claude configs, and a paste-ready agent system prompt containing live schema/JDBC/REST details.
 - **G3 — Auto-REST gateway:** `/api/v1/<db>/<schema>/<table>` CRUD for tables and read access for views, streaming-json responses, filters, pagination, CORS, API key, OpenAPI 3.0, Tailnet and Funnel exposure.
-- **G4 — Checkpoints:** List/create/restore/delete `.mv.db` checkpoints under `~/.tailsql/snapshots/<db>/`, automatic pre-agent-DDL snapshots, 1-click rollback with the same H2 port.
+- **G4 — Checkpoints:** List/create/restore/delete `.mv.db` checkpoints under `~/.hysql/snapshots/<db>/`, automatic pre-agent-DDL snapshots, 1-click rollback with the same H2 port.
 - **G5 — AI SQL assistant:** Schema-aware NL→H2 SQL in the workbench and a 10/50-row mock-data seeder with Ollama/OpenRouter/OpenAI-compatible providers and a deterministic offline fallback.
 - **G6 — Safety:** no `0.0.0.0` binds, read-only agent mode, optional auth on every exposed endpoint, identifier whitelisting + parameterized SQL in REST.
 
@@ -49,10 +49,10 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 ### 4.1 MCP server (`internal/mcp`)
 
 - JSON-RPC 2.0 over HTTP: `POST /mcp` (streamable HTTP), `GET /mcp` (SSE keepalive), legacy `GET /sse` + `POST /messages`.
-- Optional CLI stdio bridge (`cmd/tailsql-mcp`) that forwards JSON-RPC lines to the HTTP endpoint.
+- Optional CLI stdio bridge (`cmd/hysql-mcp`) that forwards JSON-RPC lines to the HTTP endpoint.
 - Tools: `list_databases`, `inspect_schema`, `read_query`, `write_query`, `execute_ddl`, `get_connection_bundle`.
-- Resources: `tailsql://databases`, `tailsql://databases/<name>/schema`.
-- Safety: Bearer `tsql_mcp_*` token; Read-Only mode blocks write/ddl; auto-checkpoint before destructive DDL when enabled.
+- Resources: `hysql://databases`, `hysql://databases/<name>/schema`.
+- Safety: Bearer `hysql_mcp_*` token; Read-Only mode blocks write/ddl; auto-checkpoint before destructive DDL when enabled.
 - Bind default `127.0.0.1`; optional Tailscale IPv4 bind.
 
 ### 4.2 Auto-REST gateway (`internal/restapi`)
@@ -63,13 +63,13 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 - `PATCH` / `DELETE` by primary key.
 - Views readable through the same GET routes; writes rejected.
 - `GET /api/v1/<db>/openapi.json`.
-- CORS `*`; `X-TailSQL-Key` or Bearer; optional unauthenticated GET for public demos.
+- CORS `*`; `X-HySQL-Key` or Bearer; optional unauthenticated GET for public demos.
 - Identifier whitelist from `INFORMATION_SCHEMA`; values via JDBC `?` parameters.
 - Local/Tailnet binding + optional HTTPS Funnel.
 
 ### 4.3 Snapshots & safe mode (`internal/snapshots`)
 
-- Snapshots under `~/.tailsql/snapshots/<db_name>/<timestamp>_<label>.mv.db` plus metadata.
+- Snapshots under `~/.hysql/snapshots/<db_name>/<timestamp>_<label>.mv.db` plus metadata.
 - Online consistent backup via H2 `BACKUP TO '<path>.zip'`; extraction to `.mv.db`. File copy fallback when stopped.
 - Restore: stop H2/proxies, replace `.mv.db`, restart on the same port, re-enable prior Tailscale hosting/Funnel.
 - Auto-snapshot on agent `DROP`/`TRUNCATE`/`ALTER` when enabled.
@@ -77,7 +77,7 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 ### 4.4 AI helper (`internal/aihelper`)
 
 - Providers: Ollama (`/api/chat`), OpenRouter/OpenAI-compatible (`/chat/completions`).
-- Settings in `~/.tailsql/config.json` (provider, base URL, model, key).
+- Settings in `~/.hysql/config.json` (provider, base URL, model, key).
 - NL→SQL with compact live DDL in the system prompt.
 - Seed rows 10/50: LLM JSON rows validated against the table, or deterministic faker fallback; FK-aware sampling.
 
@@ -104,7 +104,7 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 - [x] JSON-RPC 2.0 HTTP+SSE server with Bearer auth
 - [x] Six tools + resources + safe mode + auto-checkpoint
 - [x] Connect to AI tab and copy-ready snippets/system prompt
-- [x] Optional stdio bridge (`cmd/tailsql-mcp`)
+- [x] Optional stdio bridge (`cmd/hysql-mcp`)
 
 ### Phase 4 — Auto-REST API Gateway
 - [x] CRUD router with parameterized queries and whitelist validation
@@ -134,14 +134,14 @@ TailSQL v0.3.0 closes all four gaps while preserving the v0.2.1 desktop experien
 
 | Risk | Mitigation |
 |---|---|
-| v0.2.1 state compatibility | New preferences in `~/.tailsql/config.json`; `instances.json` schema untouched |
+| v0.2.1 state compatibility | New preferences in `~/.hysql/config.json`; `instances.json` schema untouched |
 | AI agents corrupt data | Read-Only mode, auto-checkpoint before destructive DDL, manual checkpoints |
 | SQL injection in dynamic REST paths | Schema whitelist + quoted identifiers + `?` parameter binding |
 | H2 backup while running | Use native `BACKUP TO` for consistent online snapshots |
 | Funnel port collisions | Use Tailscale Funnel allowed ports and explicit per-feature mapping |
 | Windows process/lock issues during restore | Stop H2 gracefully, verify exit, atomic file replace, restart same port |
 | LLM output invalid | Fast validation, deterministic fallback for seed data, generated SQL is shown before execution |
-| Third-party API keys | Stored only in local `~/.tailsql/config.json` (`0600`), never logged |
+| Third-party API keys | Stored only in local `~/.hysql/config.json` (`0600`), never logged |
 
 ## 8. Definition of Done
 

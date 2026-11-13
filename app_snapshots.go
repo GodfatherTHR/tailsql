@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/snapshots"
-	"tailsql/internal/sqlrunner"
+	"hysql/internal/config"
+	"hysql/internal/snapshots"
+	"hysql/internal/sqlrunner"
 )
 
 func (a *App) snapshotStore() (*snapshots.Store, error) {
@@ -80,7 +80,7 @@ func (a *App) createCheckpoint(instance config.Instance, label string) (Snapshot
 	}
 	var entry snapshots.Snapshot
 	if instance.Status == config.StatusRunning {
-		tempZip := filepath.Join(os.TempDir(), fmt.Sprintf("tailsql-backup-%d.zip", time.Now().UnixNano()))
+		tempZip := filepath.Join(os.TempDir(), fmt.Sprintf("hysql-backup-%d.zip", time.Now().UnixNano()))
 		defer os.Remove(tempZip)
 		statement := "BACKUP TO '" + escapeSQLPath(filepath.ToSlash(tempZip)) + "'"
 		runner := sqlrunner.New(manager, manager.Bridge())

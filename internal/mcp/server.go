@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 const (
@@ -214,7 +214,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	}
 	if request.URL.Path == "/health" {
 		writeJSON(response, http.StatusOK, map[string]any{
-			"ok": true, "server": "tailsql-mcp", "version": s.config().Version,
+			"ok": true, "server": "hysql-mcp", "version": s.config().Version,
 		})
 		return
 	}
@@ -356,10 +356,10 @@ func (s *Server) dispatch(ctx context.Context, request rpcRequest) rpcResponse {
 				"prompts":   map[string]any{"listChanged": false},
 			},
 			"serverInfo": map[string]any{
-				"name":    "tailsql",
+				"name":    "hysql",
 				"version": s.config().Version,
 			},
-			"instructions": "TailSQL exposes live H2 databases. Call list_databases first, then inspect_schema before writing SQL. Use read_query for SELECT, write_query for DML, execute_ddl for schema changes, and get_connection_bundle to build an app with JDBC or the Auto-REST API.",
+			"instructions": "HySQL exposes live H2 databases. Call list_databases first, then inspect_schema before writing SQL. Use read_query for SELECT, write_query for DML, execute_ddl for schema changes, and get_connection_bundle to build an app with JDBC or the Auto-REST API.",
 		}}
 	case "ping":
 		return rpcResponse{JSONRPC: "2.0", ID: id, Result: map[string]any{}}
@@ -579,14 +579,14 @@ func (s *Server) toolBundle(ctx context.Context, raw json.RawMessage) (any, erro
 
 func (s *Server) resourceList() []map[string]any {
 	resources := []map[string]any{{
-		"uri":         "tailsql://databases",
-		"name":        "TailSQL databases",
-		"description": "All databases managed by TailSQL with status and connection URLs.",
+		"uri":         "hysql://databases",
+		"name":        "HySQL databases",
+		"description": "All databases managed by HySQL with status and connection URLs.",
 		"mimeType":    "application/json",
 	}}
 	for _, database := range s.backend.ListDatabases() {
 		resources = append(resources, map[string]any{
-			"uri":         "tailsql://databases/" + database.Name + "/schema",
+			"uri":         "hysql://databases/" + database.Name + "/schema",
 			"name":        database.Name + " schema",
 			"description": "Live H2 schema for " + database.Name + ".",
 			"mimeType":    "application/json",
@@ -602,7 +602,7 @@ func (s *Server) readResource(id json.RawMessage, params json.RawMessage) rpcRes
 	if err := json.Unmarshal(params, &request); err != nil {
 		return rpcErrorResponse(id, -32602, "Invalid resource parameters.")
 	}
-	if request.URI == "tailsql://databases" {
+	if request.URI == "hysql://databases" {
 		databases := s.backend.ListDatabases()
 		if databases == nil {
 			databases = []Database{}
@@ -614,8 +614,8 @@ func (s *Server) readResource(id json.RawMessage, params json.RawMessage) rpcRes
 			}},
 		}}
 	}
-	if strings.HasPrefix(request.URI, "tailsql://databases/") && strings.HasSuffix(request.URI, "/schema") {
-		name := strings.TrimSuffix(strings.TrimPrefix(request.URI, "tailsql://databases/"), "/schema")
+	if strings.HasPrefix(request.URI, "hysql://databases/") && strings.HasSuffix(request.URI, "/schema") {
+		name := strings.TrimSuffix(strings.TrimPrefix(request.URI, "hysql://databases/"), "/schema")
 		name = strings.Trim(name, "/")
 		if name == "" {
 			return rpcErrorResponse(id, -32602, "Resource URI is missing a database name.")
@@ -646,7 +646,7 @@ func (s *Server) handleStream(response http.ResponseWriter, request *http.Reques
 	response.Header().Set("Cache-Control", "no-cache")
 	response.Header().Set("Connection", "keep-alive")
 	response.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprint(response, ": tailsql-mcp stream ready\n\n")
+	_, _ = fmt.Fprint(response, ": hysql-mcp stream ready\n\n")
 	flusher.Flush()
 	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()
@@ -747,7 +747,7 @@ func toolDefinitions() []map[string]any {
 	return []map[string]any{
 		{
 			"name":        "list_databases",
-			"description": "List every database managed by TailSQL with running state, local/Tailscale JDBC URLs, and the Auto-REST base URL.",
+			"description": "List every database managed by HySQL with running state, local/Tailscale JDBC URLs, and the Auto-REST base URL.",
 			"inputSchema": map[string]any{"type": "object", "properties": map[string]any{}, "additionalProperties": false},
 		},
 		{

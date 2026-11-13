@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"tailsql/internal/dbmanager"
-	"tailsql/internal/jdbc"
-	"tailsql/internal/snapshots"
+	"hysql/internal/dbmanager"
+	"hysql/internal/jdbc"
+	"hysql/internal/snapshots"
 )
 
 type fixedProvider struct {
@@ -24,8 +24,8 @@ func (p fixedProvider) ConnectionInfo(string) (string, string, string, error) {
 }
 
 func TestTableDataIntegration(t *testing.T) {
-	if os.Getenv("TAILSQL_INTEGRATION") != "1" {
-		t.Skip("set TAILSQL_INTEGRATION=1 to run real-H2 table editor tests")
+	if os.Getenv("HYSQL_INTEGRATION") != "1" {
+		t.Skip("set HYSQL_INTEGRATION=1 to run real-H2 table editor tests")
 	}
 	java := dbmanager.DetectJava("")
 	if !java.Supported {

@@ -103,7 +103,7 @@ function desktop(): DesktopBridge {
   const bridge = window.go?.main?.App;
   if (!bridge) {
     throw new Error(
-      'TailSQL desktop bridge is unavailable. Launch the app through Wails (`wails dev` or the packaged binary).',
+      'HySQL desktop bridge is unavailable. Launch the app through Wails (`wails dev` or the packaged binary).',
     );
   }
   return bridge as unknown as DesktopBridge;

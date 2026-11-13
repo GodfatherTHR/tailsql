@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/executil"
+	"hysql/internal/executil"
 )
 
 // HTTPFunnelState describes the public HTTPS mapping for the REST gateway.

@@ -43,14 +43,14 @@ try {
 
     $wailsConfig = Get-Content (Join-Path $root "wails.json") -Raw | ConvertFrom-Json
     $version = $wailsConfig.info.productVersion
-    $versionedExe = Join-Path $root "build/bin/TailSQL-$version.exe"
-    Copy-Item -Path (Join-Path $root "build/bin/TailSQL.exe") -Destination $versionedExe -Force
+    $versionedExe = Join-Path $root "build/bin/HySQL-$version.exe"
+    Copy-Item -Path (Join-Path $root "build/bin/HySQL.exe") -Destination $versionedExe -Force
 
-    $mcpBridge = Join-Path $root "build/bin/tailsql-mcp.exe"
-    & go build -o $mcpBridge ./cmd/tailsql-mcp
-    if ($LASTEXITCODE -ne 0) { throw "tailsql-mcp build failed" }
+    $mcpBridge = Join-Path $root "build/bin/hysql-mcp.exe"
+    & go build -o $mcpBridge ./cmd/hysql-mcp
+    if ($LASTEXITCODE -ne 0) { throw "hysql-mcp build failed" }
 
-    Write-Host "Build complete: $root/build/bin/TailSQL.exe"
+    Write-Host "Build complete: $root/build/bin/HySQL.exe"
     Write-Host "Versioned executable: $versionedExe"
     Write-Host "MCP stdio bridge: $mcpBridge"
     Write-Host "H2 asset copied next to the executable."

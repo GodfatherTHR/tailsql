@@ -17,10 +17,10 @@ func TestPreferencesDefaultsAndTokens(t *testing.T) {
 	if prefs.MCPPort != DefaultMCPPort || prefs.RESTPort != DefaultRESTPort {
 		t.Fatalf("unexpected default ports: %+v", prefs)
 	}
-	if !strings.HasPrefix(prefs.MCPToken, "tsql_mcp_") {
+	if !strings.HasPrefix(prefs.MCPToken, "hysql_mcp_") {
 		t.Fatalf("unexpected MCP token: %q", prefs.MCPToken)
 	}
-	if !strings.HasPrefix(prefs.RESTAPIKey, "tsql_rest_") {
+	if !strings.HasPrefix(prefs.RESTAPIKey, "hysql_rest_") {
 		t.Fatalf("unexpected REST key: %q", prefs.RESTAPIKey)
 	}
 	if !prefs.AutoSnapshotOnAgentDDL {
@@ -77,7 +77,7 @@ func TestPreferencesNormalizeAndRotate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("rotate token: %v", err)
 	}
-	if rotated.MCPToken == oldToken || !strings.HasPrefix(rotated.MCPToken, "tsql_mcp_") {
+	if rotated.MCPToken == oldToken || !strings.HasPrefix(rotated.MCPToken, "hysql_mcp_") {
 		t.Fatal("MCP token was not rotated")
 	}
 }

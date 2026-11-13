@@ -30,7 +30,7 @@ type Snapshot struct {
 	CreatedAt string `json:"createdAt"`
 }
 
-// Store owns the ~/.tailsql/snapshots tree.
+// Store owns the ~/.hysql/snapshots tree.
 type Store struct {
 	root string
 	now  func() time.Time

@@ -27,7 +27,7 @@ const (
 	ProviderOpenAICompat = "openai"
 )
 
-// Preferences are the v0.3 feature settings persisted in ~/.tailsql/config.json.
+// Preferences are the v0.3 feature settings persisted in ~/.hysql/config.json.
 // They are intentionally separate from instances.json so v0.2.1 state stays
 // byte-compatible.
 type Preferences struct {
@@ -72,7 +72,7 @@ type PreferencesStore struct {
 	prefs Preferences
 }
 
-// OpenPreferences loads or creates ~/.tailsql/config.json. Missing tokens are
+// OpenPreferences loads or creates ~/.hysql/config.json. Missing tokens are
 // generated and persisted so the first UI load can show them immediately.
 func OpenPreferences(path string) (*PreferencesStore, error) {
 	if strings.TrimSpace(path) == "" {
@@ -131,10 +131,10 @@ func (s *PreferencesStore) Get() Preferences {
 func (s *PreferencesStore) Update(prefs Preferences) error {
 	prefs = normalizePreferences(prefs)
 	if prefs.MCPToken == "" {
-		prefs.MCPToken = generateToken("tsql_mcp_")
+		prefs.MCPToken = generateToken("hysql_mcp_")
 	}
 	if prefs.RESTAPIKey == "" {
-		prefs.RESTAPIKey = generateToken("tsql_rest_")
+		prefs.RESTAPIKey = generateToken("hysql_rest_")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -152,7 +152,7 @@ func (s *PreferencesStore) RotateMCPToken() (Preferences, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	previous := s.prefs
-	s.prefs.MCPToken = generateToken("tsql_mcp_")
+	s.prefs.MCPToken = generateToken("hysql_mcp_")
 	if err := s.saveLocked(); err != nil {
 		s.prefs = previous
 		return previous, err
@@ -165,7 +165,7 @@ func (s *PreferencesStore) RotateRESTKey() (Preferences, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	previous := s.prefs
-	s.prefs.RESTAPIKey = generateToken("tsql_rest_")
+	s.prefs.RESTAPIKey = generateToken("hysql_rest_")
 	if err := s.saveLocked(); err != nil {
 		s.prefs = previous
 		return previous, err
@@ -180,11 +180,11 @@ func (s *PreferencesStore) normalize() {
 func (s *PreferencesStore) ensureTokens() bool {
 	changed := false
 	if strings.TrimSpace(s.prefs.MCPToken) == "" {
-		s.prefs.MCPToken = generateToken("tsql_mcp_")
+		s.prefs.MCPToken = generateToken("hysql_mcp_")
 		changed = true
 	}
 	if strings.TrimSpace(s.prefs.RESTAPIKey) == "" {
-		s.prefs.RESTAPIKey = generateToken("tsql_rest_")
+		s.prefs.RESTAPIKey = generateToken("hysql_rest_")
 		changed = true
 	}
 	return changed

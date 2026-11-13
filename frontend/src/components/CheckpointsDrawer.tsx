@@ -98,7 +98,7 @@ export function CheckpointsDrawer({ open, instance, onClose, onToast }: Checkpoi
         open={open}
         onClose={onClose}
         title={`Checkpoints — ${instance.name}`}
-        description="Consistent .mv.db snapshots stored under ~/.tailsql/snapshots. Restore stops H2, replaces the file, and restarts on the same port."
+        description="Consistent .mv.db snapshots stored under ~/.hysql/snapshots. Restore stops H2, replaces the file, and restarts on the same port."
         size="lg"
         preventClose={Boolean(busy)}
         footer={
@@ -220,7 +220,7 @@ export function CheckpointsDrawer({ open, instance, onClose, onToast }: Checkpoi
         description={
           pending
             ? pending.kind === 'restore'
-              ? `Restore “${pending.snapshot.label}” into ${instance.name}? TailSQL stops H2, replaces the .mv.db file, and restarts on port ${instance.port}. The current state is snapshotted first.`
+              ? `Restore “${pending.snapshot.label}” into ${instance.name}? HySQL stops H2, replaces the .mv.db file, and restarts on port ${instance.port}. The current state is snapshotted first.`
               : `Delete the checkpoint “${pending.snapshot.label}”? This only removes the snapshot file.`
             : ''
         }

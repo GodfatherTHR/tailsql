@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 const (
@@ -236,19 +236,19 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	}
 	path := request.URL.Path
 	if path == "/health" || path == "/api/v1/health" {
-		writeJSON(response, http.StatusOK, map[string]any{"ok": true, "server": "tailsql-rest"})
+		writeJSON(response, http.StatusOK, map[string]any{"ok": true, "server": "hysql-rest"})
 		return
 	}
 	if path == "/" || path == "/api/v1" {
 		writeJSON(response, http.StatusOK, map[string]any{
-			"name":    "TailSQL Auto-REST",
+			"name":    "HySQL Auto-REST",
 			"version": s.config().Version,
 			"routes":  "/api/v1/<database>/<schema>/<table>",
 		})
 		return
 	}
 	if !s.authorized(request) {
-		writeError(response, http.StatusUnauthorized, "unauthorized", "A valid X-TailSQL-Key or Bearer token is required.")
+		writeError(response, http.StatusUnauthorized, "unauthorized", "A valid X-HySQL-Key or Bearer token is required.")
 		return
 	}
 	if !strings.HasPrefix(path, "/api/v1/") {
@@ -347,7 +347,7 @@ func (s *Server) authorized(request *http.Request) bool {
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return true
 	}
-	provided := strings.TrimSpace(request.Header.Get("X-TailSQL-Key"))
+	provided := strings.TrimSpace(request.Header.Get("X-HySQL-Key"))
 	if provided == "" {
 		authorization := strings.TrimSpace(request.Header.Get("Authorization"))
 		if strings.HasPrefix(strings.ToLower(authorization), "bearer ") {
@@ -971,7 +971,7 @@ func buildOpenAPI(database Database, snapshot jdbc.SchemaSnapshot, base, version
 	return map[string]any{
 		"openapi": "3.0.3",
 		"info": map[string]any{
-			"title":       "TailSQL Auto-REST — " + database.Name,
+			"title":       "HySQL Auto-REST — " + database.Name,
 			"version":     version,
 			"description": "Generated from live H2 INFORMATION_SCHEMA metadata.",
 		},
@@ -1015,7 +1015,7 @@ func setCORS(response http.ResponseWriter) {
 	headers := response.Header()
 	headers.Set("Access-Control-Allow-Origin", "*")
 	headers.Set("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS")
-	headers.Set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-TailSQL-Key")
+	headers.Set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-HySQL-Key")
 	headers.Set("Access-Control-Max-Age", "86400")
 }
 

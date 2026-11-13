@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/aihelper"
-	"tailsql/internal/codegen"
-	"tailsql/internal/config"
-	"tailsql/internal/jdbc"
-	"tailsql/internal/mcp"
-	"tailsql/internal/restapi"
-	"tailsql/internal/sqlrunner"
+	"hysql/internal/aihelper"
+	"hysql/internal/codegen"
+	"hysql/internal/config"
+	"hysql/internal/jdbc"
+	"hysql/internal/mcp"
+	"hysql/internal/restapi"
+	"hysql/internal/sqlrunner"
 )
 
 // mcpBackend adapts the desktop app to the MCP tool contract.
@@ -280,7 +280,7 @@ func (b *restBackend) Query(ctx context.Context, databaseID, sql string, params 
 func (a *App) resolveInstance(name string) (config.Instance, error) {
 	manager, _, _ := a.components()
 	if manager == nil {
-		return config.Instance{}, errors.New("TailSQL backend is not initialized")
+		return config.Instance{}, errors.New("HySQL backend is not initialized")
 	}
 	target := strings.TrimSpace(name)
 	if target == "" {

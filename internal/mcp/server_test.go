@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"tailsql/internal/jdbc"
+	"hysql/internal/jdbc"
 )
 
 type fakeBackend struct {
@@ -106,7 +106,7 @@ func TestInitializeAndToolList(t *testing.T) {
 	}
 	result := decodeResult(t, initRecorder)
 	serverInfo, ok := result["serverInfo"].(map[string]any)
-	if !ok || serverInfo["name"] != "tailsql" {
+	if !ok || serverInfo["name"] != "hysql" {
 		t.Fatalf("unexpected serverInfo: %+v", result)
 	}
 

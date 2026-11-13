@@ -41,7 +41,7 @@ interface WorkbenchDraft {
 const drafts = new Map<string, WorkbenchDraft>();
 
 function draftStorageKey(instanceId: string): string {
-  return `tailsql.workbench.query.${instanceId}`;
+  return `hysql.workbench.query.${instanceId}`;
 }
 
 function loadDraft(instanceId: string): WorkbenchDraft {

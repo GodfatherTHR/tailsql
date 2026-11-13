@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TailSQL documentation | Install, edit data, share, troubleshoot</title>
-  <meta name="description" content="TailSQL documentation: install on Windows, create an H2 database, use the table editor and SQL workbench, connect from Java, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
+  <title>HySQL documentation | Install, edit data, share, troubleshoot</title>
+  <meta name="description" content="HySQL documentation: install on Windows, create an H2 database, use the table editor and SQL workbench, connect from Java, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
   <meta name="theme-color" content="#060a0e">
-  <meta property="og:title" content="TailSQL documentation">
-  <meta property="og:description" content="Install TailSQL, create an H2 database, edit rows, run SQL, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
+  <meta property="og:title" content="HySQL documentation">
+  <meta property="og:description" content="Install HySQL, create an H2 database, edit rows, run SQL, share with Tailscale, publish with Funnel, and troubleshoot common issues.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://godfatherthr.github.io/tailsql/docs.html">
-  <meta property="og:image" content="https://godfatherthr.github.io/tailsql/assets/logo.png">
+  <meta property="og:url" content="https://godfatherthr.github.io/hysql/docs.html">
+  <meta property="og:image" content="https://godfatherthr.github.io/hysql/assets/logo.png">
   <link rel="icon" href="./assets/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="./assets/appicon.png">
   <script>document.documentElement.classList.add("js");</script>
@@ -22,10 +22,10 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="./index.html" aria-label="TailSQL home">
+      <a class="brand" href="./index.html" aria-label="HySQL home">
         <img src="./assets/logo-mark.png" alt="" width="36" height="36">
         <span class="brand-text">
-          <strong>TailSQL</strong>
+          <strong>HySQL</strong>
           <span>Documentation</span>
         </span>
       </a>
@@ -33,8 +33,8 @@
         <a href="./index.html#features">Features</a>
         <a href="./index.html#preview">Product</a>
         <a href="./docs.html">Docs</a>
-        <a class="nav-download" href="https://github.com/GodfatherTHR/tailsql/releases/latest">Download</a>
-        <a class="nav-github" href="https://github.com/GodfatherTHR/tailsql">GitHub</a>
+        <a class="nav-download" href="https://github.com/GodfatherTHR/hysql/releases/latest">Download</a>
+        <a class="nav-github" href="https://github.com/GodfatherTHR/hysql">GitHub</a>
       </nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
     </div>
@@ -43,9 +43,9 @@
   <main id="main">
     <section class="docs-hero">
       <div class="container">
-        <span class="eyebrow"><span class="pulse"></span> TailSQL 0.3.0</span>
+        <span class="eyebrow"><span class="pulse"></span> HySQL 0.3.0</span>
         <h1>Documentation</h1>
-        <p>Everything you need to install TailSQL, create an H2 database, edit rows, run SQL, connect from Java, and share safely with Tailscale or Funnel.</p>
+        <p>Everything you need to install HySQL, create an H2 database, edit rows, run SQL, connect from Java, and share safely with Tailscale or Funnel.</p>
       </div>
     </section>
 
@@ -83,7 +83,7 @@
       <div class="docs-content">
         <article class="doc-section" id="requirements">
           <h2>Requirements</h2>
-          <p>TailSQL runs as a Windows desktop app. The local database features do not need Tailscale.</p>
+          <p>HySQL runs as a Windows desktop app. The local database features do not need Tailscale.</p>
           <div class="doc-table-wrap">
             <table class="doc-table">
               <thead>
@@ -100,21 +100,21 @@
           </div>
           <div class="doc-callout">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-            <span><strong>Java is required.</strong> If TailSQL cannot find Java, install a JDK or JRE 11 or newer and make sure <code>java</code> is on PATH or <code>JAVA_HOME</code> is set.</span>
+            <span><strong>Java is required.</strong> If HySQL cannot find Java, install a JDK or JRE 11 or newer and make sure <code>java</code> is on PATH or <code>JAVA_HOME</code> is set.</span>
           </div>
         </article>
 
         <article class="doc-section" id="install">
-          <h2>Install TailSQL</h2>
+          <h2>Install HySQL</h2>
           <ol class="numbered">
-            <li>Download <code>TailSQL-Setup-0.3.0.exe</code> from the <a href="https://github.com/GodfatherTHR/tailsql/releases/latest">latest GitHub release</a>.</li>
+            <li>Download <code>HySQL-Setup-0.3.0.exe</code> from the <a href="https://github.com/GodfatherTHR/hysql/releases/latest">latest GitHub release</a>.</li>
             <li>Run the installer. If Windows SmartScreen appears, choose <strong>More info</strong>, then <strong>Run anyway</strong>. The installer is currently unsigned.</li>
-            <li>Choose an install folder and finish the wizard. The default is <code>%ProgramFiles%\TailSQL</code>.</li>
-            <li>Launch TailSQL from the Start Menu or the desktop shortcut.</li>
+            <li>Choose an install folder and finish the wizard. The default is <code>%ProgramFiles%\HySQL</code>.</li>
+            <li>Launch HySQL from the Start Menu or the desktop shortcut.</li>
           </ol>
-          <p>The installer places <code>TailSQL.exe</code> and the required <code>assets\h2.jar</code> in the install folder. Your database data is stored separately in your user profile.</p>
+          <p>The installer places <code>HySQL.exe</code> and the required <code>assets\h2.jar</code> in the install folder. Your database data is stored separately in your user profile.</p>
           <h3>Uninstall</h3>
-          <p>Use <strong>Settings &gt; Apps &gt; Installed apps</strong> or the <strong>Uninstall TailSQL</strong> shortcut in the Start Menu. Uninstalling removes the application files. It does not delete the databases in <code>~/.tailsql</code>.</p>
+          <p>Use <strong>Settings &gt; Apps &gt; Installed apps</strong> or the <strong>Uninstall HySQL</strong> shortcut in the Start Menu. Uninstalling removes the application files. It does not delete the databases in <code>~/.hysql</code>.</p>
         </article>
 
         <article class="doc-section" id="first-database">
@@ -127,10 +127,10 @@
             <li>Leave the port empty to choose the next free port automatically, or enter a port between 1024 and 65535.</li>
             <li>Select <strong>Create and start</strong>.</li>
           </ol>
-          <p>TailSQL creates the database, starts the H2 TCP server on <code>127.0.0.1</code>, and stores the database file in <code>~/.tailsql/dbs</code>.</p>
+          <p>HySQL creates the database, starts the H2 TCP server on <code>127.0.0.1</code>, and stores the database file in <code>~/.hysql/dbs</code>.</p>
           <div class="doc-callout warning">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
-            <span><strong>Credentials are local.</strong> The database user name, password, and H2 shutdown secret are stored in <code>~/.tailsql/instances.json</code>. Protect that file like any other credential store.</span>
+            <span><strong>Credentials are local.</strong> The database user name, password, and H2 shutdown secret are stored in <code>~/.hysql/instances.json</code>. Protect that file like any other credential store.</span>
           </div>
         </article>
 
@@ -166,7 +166,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
             <span><strong>Tables need a primary key for edits and deletes.</strong> H2 does not provide a universal row identifier. Tables without a primary key can still accept inserts, and views are read only in the editor.</span>
           </div>
-          <p>Values longer than the display cap are marked <strong>truncated</strong>. TailSQL does not save those values back by accident. Use the SQL Workbench when you need to edit a very large text value.</p>
+          <p>Values longer than the display cap are marked <strong>truncated</strong>. HySQL does not save those values back by accident. Use the SQL Workbench when you need to edit a very large text value.</p>
         </article>
 
         <article class="doc-section" id="sql-workbench">
@@ -210,12 +210,12 @@ ORDER BY stock ASC;</code></pre>
 
         <article class="doc-section" id="tailscale">
           <h2>Tailscale hosting</h2>
-          <p>Tailscale hosting shares the database with other devices on your tailnet. The H2 engine stays on loopback, and TailSQL starts a proxy on the detected Tailscale IPv4 address.</p>
+          <p>Tailscale hosting shares the database with other devices on your tailnet. The H2 engine stays on loopback, and HySQL starts a proxy on the detected Tailscale IPv4 address.</p>
           <ol class="numbered">
             <li>Make sure Tailscale is installed, running, and signed in.</li>
             <li>Start the database.</li>
             <li>Open <strong>Overview</strong> and find the <strong>Tailscale hosting</strong> card.</li>
-            <li>Turn on the switch. TailSQL chooses the next free proxy port and shows the generated JDBC endpoint.</li>
+            <li>Turn on the switch. HySQL chooses the next free proxy port and shows the generated JDBC endpoint.</li>
             <li>Share the endpoint with a device allowed by your Tailscale ACLs.</li>
           </ol>
           <p>The card shows the active clients, total connections, bytes sent to H2, and bytes sent to peers.</p>
@@ -234,7 +234,7 @@ ORDER BY stock ASC;</code></pre>
             <li>Choose a public port. Funnel only supports 443, 8443, and 10000. Port 10000 is the default because 443 and 8443 are often used by HTTPS services.</li>
             <li>Select <strong>Publish database</strong> and copy the public JDBC endpoint.</li>
           </ol>
-          <p>The card shows the public host, Funnel port, and the JDBC URL. TailSQL removes the mapping when the database stops, restarts, is deleted, or the app exits cleanly. A mapping left behind by a crash is checked on the next launch.</p>
+          <p>The card shows the public host, Funnel port, and the JDBC URL. HySQL removes the mapping when the database stops, restarts, is deleted, or the app exits cleanly. A mapping left behind by a crash is checked on the next launch.</p>
           <div class="doc-callout danger">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
             <span><strong>Funnel is public and raw TCP is not encrypted in transit.</strong> Anyone on the internet can reach the H2 port. The database password is the only access control. Use a strong password, share only what you intend to share, and disable Funnel when you are done.</span>
@@ -244,7 +244,7 @@ ORDER BY stock ASC;</code></pre>
 
         <article class="doc-section" id="data-locations">
           <h2>Data locations and backups</h2>
-          <p>TailSQL stores everything under <code>%USERPROFILE%\.tailsql</code> on Windows.</p>
+          <p>HySQL stores everything under <code>%USERPROFILE%\.hysql</code> on Windows.</p>
           <div class="doc-table-wrap">
             <table class="doc-table">
               <thead>
@@ -261,21 +261,21 @@ ORDER BY stock ASC;</code></pre>
           </div>
           <h3>Back up a database</h3>
           <ol class="numbered">
-            <li>Stop the database in TailSQL.</li>
-            <li>Copy the matching <code>.mv.db</code> file from <code>~/.tailsql/dbs</code>.</li>
+            <li>Stop the database in HySQL.</li>
+            <li>Copy the matching <code>.mv.db</code> file from <code>~/.hysql/dbs</code>.</li>
             <li>Store the copy somewhere safe.</li>
           </ol>
-          <p>Restoring a file is the reverse: stop TailSQL, put the <code>.mv.db</code> file back in <code>~/.tailsql/dbs</code>, then start the database.</p>
+          <p>Restoring a file is the reverse: stop HySQL, put the <code>.mv.db</code> file back in <code>~/.hysql/dbs</code>, then start the database.</p>
         </article>
 
         <article class="doc-section" id="security">
           <h2>Security notes</h2>
           <ul class="bullets">
-            <li><strong>Local by default.</strong> H2 binds to <code>127.0.0.1</code>. TailSQL never binds the engine to a wildcard address.</li>
+            <li><strong>Local by default.</strong> H2 binds to <code>127.0.0.1</code>. HySQL never binds the engine to a wildcard address.</li>
             <li><strong>Tailnet sharing.</strong> The proxy binds to the Tailscale address. Your Tailscale ACLs decide which peers can reach it.</li>
             <li><strong>Public Funnel.</strong> Funnel exposes raw TCP to the internet. It is not encrypted in transit. Use a strong H2 password and disable Funnel when you are done.</li>
             <li><strong>Credentials.</strong> The database password and the H2 shutdown secret are stored in <code>instances.json</code>. Credentials are immutable in this release; recreate the database to rotate them.</li>
-            <li><strong>Uninstall.</strong> Uninstalling removes the app, not your databases. Delete <code>~/.tailsql</code> manually if you want to remove all local data.</li>
+            <li><strong>Uninstall.</strong> Uninstalling removes the app, not your databases. Delete <code>~/.hysql</code> manually if you want to remove all local data.</li>
           </ul>
         </article>
 
@@ -283,18 +283,18 @@ ORDER BY stock ASC;</code></pre>
           <h2>Troubleshooting</h2>
 
           <h3>Database may be already in use (SQLState 90020)</h3>
-          <p>This error means another process is holding the <code>.mv.db</code> file. It often happens when a previous TailSQL session or a failed start leaves an H2 server running.</p>
-          <p><strong>TailSQL 0.3.0 handles this automatically.</strong> Before starting a database, it finds H2 servers that match the instance port, database folder, and shutdown password. A healthy server is adopted. A wedged server that still holds the file is stopped, then the database starts normally.</p>
+          <p>This error means another process is holding the <code>.mv.db</code> file. It often happens when a previous HySQL session or a failed start leaves an H2 server running.</p>
+          <p><strong>HySQL 0.3.0 handles this automatically.</strong> Before starting a database, it finds H2 servers that match the instance port, database folder, and shutdown password. A healthy server is adopted. A wedged server that still holds the file is stopped, then the database starts normally.</p>
           <div class="doc-callout warning">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 17H3L12 3z"/><path d="M12 9v5M12 17h.01"/></svg>
-            <span><strong>On an older build,</strong> close every TailSQL window. Open Task Manager, find <code>java.exe</code> processes whose command line contains <code>org.h2.tools.Server</code> and your <code>~/.tailsql</code> folder, and end only those processes. Do not end unrelated Java applications. Then relaunch TailSQL and start the database again.</span>
+            <span><strong>On an older build,</strong> close every HySQL window. Open Task Manager, find <code>java.exe</code> processes whose command line contains <code>org.h2.tools.Server</code> and your <code>~/.hysql</code> folder, and end only those processes. Do not end unrelated Java applications. Then relaunch HySQL and start the database again.</span>
           </div>
 
           <h3>Java is not installed or is too old</h3>
-          <p>Install Java 11 or newer. TailSQL prefers <code>JAVA_HOME</code>, then <code>java</code> on PATH. You can also set <code>settings.javaPath</code> in <code>~/.tailsql/instances.json</code> to a specific Java executable. Select <strong>Refresh system health</strong> after changing Java.</p>
+          <p>Install Java 11 or newer. HySQL prefers <code>JAVA_HOME</code>, then <code>java</code> on PATH. You can also set <code>settings.javaPath</code> in <code>~/.hysql/instances.json</code> to a specific Java executable. Select <strong>Refresh system health</strong> after changing Java.</p>
 
           <h3>The H2 engine is missing</h3>
-          <p>Use the <strong>Download H2</strong> action in the health banner. The pinned engine is installed into <code>~/.tailsql/assets/h2.jar</code>. The Windows installer also includes a copy next to the app.</p>
+          <p>Use the <strong>Download H2</strong> action in the health banner. The pinned engine is installed into <code>~/.hysql/assets/h2.jar</code>. The Windows installer also includes a copy next to the app.</p>
 
           <h3>Tailscale is not connected</h3>
           <p>Open Tailscale, sign in, and select <strong>Refresh</strong> in the Tailscale card or the sidebar. Local databases continue to work without Tailscale.</p>
@@ -309,13 +309,13 @@ ORDER BY stock ASC;</code></pre>
           <p>The table likely has no primary key, or the selected object is a view. Tables without a primary key accept inserts but not updates or deletes. Use a table with a primary key for full editing.</p>
 
           <h3>A database port is already in use</h3>
-          <p>Create the database with an empty port field so TailSQL chooses a free port, or select another port between 1024 and 65535.</p>
+          <p>Create the database with an empty port field so HySQL chooses a free port, or select another port between 1024 and 65535.</p>
 
           <h3>The app does not open</h3>
-          <p>Install the Microsoft Edge WebView2 runtime if it is missing. On Windows 10 and 11 it is usually already present. Also check that <code>~/.tailsql</code> is writable by your user.</p>
+          <p>Install the Microsoft Edge WebView2 runtime if it is missing. On Windows 10 and 11 it is usually already present. Also check that <code>~/.hysql</code> is writable by your user.</p>
 
           <h3>Where are the logs?</h3>
-          <p>Open the Overview screen and use the server log panel, or read <code>~/.tailsql/logs/&lt;instance-id&gt;.log</code>.</p>
+          <p>Open the Overview screen and use the server log panel, or read <code>~/.hysql/logs/&lt;instance-id&gt;.log</code>.</p>
         </article>
 
         <article class="doc-section" id="shortcuts">
@@ -336,7 +336,7 @@ ORDER BY stock ASC;</code></pre>
 
         <article class="doc-section" id="build">
           <h2>Build from source</h2>
-          <p>TailSQL is a Wails app with a Go backend and a React frontend. The source is public at <a href="https://github.com/GodfatherTHR/tailsql">github.com/GodfatherTHR/tailsql</a>.</p>
+          <p>HySQL is a Wails app with a Go backend and a React frontend. The source is public at <a href="https://github.com/GodfatherTHR/hysql">github.com/GodfatherTHR/hysql</a>.</p>
           <h3>Build requirements</h3>
           <ul class="bullets">
             <li>Go 1.22 or newer.</li>
@@ -367,7 +367,7 @@ npm run build</code></pre>
           <h3>Run the real-H2 integration tests</h3>
           <div class="code-block">
             <div class="code-block-head"><span>PowerShell</span><button class="copy-btn" type="button" data-copy>Copy</button></div>
-            <pre><code>$env:TAILSQL_INTEGRATION = "1"
+            <pre><code>$env:HYSQL_INTEGRATION = "1"
 go test ./internal/dbmanager -v
 go test ./internal/sqlrunner -run TestTableDataIntegration -v</code></pre>
           </div>
@@ -386,12 +386,12 @@ scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"
           <h2>FAQ</h2>
           <div class="faq-list">
             <details>
-              <summary>Does TailSQL require Tailscale?</summary>
+              <summary>Does HySQL require Tailscale?</summary>
               <p>No. All local database features work without Tailscale. Tailscale is needed only for tailnet hosting or public Funnel hosting.</p>
             </details>
             <details>
               <summary>Where are my databases stored?</summary>
-              <p>Under <code>%USERPROFILE%\.tailsql</code>. Database files are in <code>dbs</code>, logs are in <code>logs</code>, and instance metadata is in <code>instances.json</code>.</p>
+              <p>Under <code>%USERPROFILE%\.hysql</code>. Database files are in <code>dbs</code>, logs are in <code>logs</code>, and instance metadata is in <code>instances.json</code>.</p>
             </details>
             <details>
               <summary>Can I rotate the database password?</summary>
@@ -403,18 +403,18 @@ scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"
             </details>
             <details>
               <summary>Why can I insert but not edit a table?</summary>
-              <p>The table has no primary key. H2 cannot identify a single row without one, so TailSQL disables updates and deletes for keyless tables.</p>
+              <p>The table has no primary key. H2 cannot identify a single row without one, so HySQL disables updates and deletes for keyless tables.</p>
             </details>
             <details>
               <summary>Can I use an existing H2 database file?</summary>
-              <p>TailSQL manages its own instance metadata. To open an existing file, place it in <code>~/.tailsql/dbs</code> with the expected name and create an instance with matching database user credentials, or connect to it with another H2 client.</p>
+              <p>HySQL manages its own instance metadata. To open an existing file, place it in <code>~/.hysql/dbs</code> with the expected name and create an instance with matching database user credentials, or connect to it with another H2 client.</p>
             </details>
             <details>
               <summary>Does uninstalling delete my data?</summary>
-              <p>No. The uninstaller removes the application files. Delete <code>~/.tailsql</code> manually after making a backup if you want to remove all data.</p>
+              <p>No. The uninstaller removes the application files. Delete <code>~/.hysql</code> manually after making a backup if you want to remove all data.</p>
             </details>
             <details>
-              <summary>Does TailSQL run on macOS or Linux?</summary>
+              <summary>Does HySQL run on macOS or Linux?</summary>
               <p>The source includes cross-platform Go and Wails code and can be built on macOS or Linux. The published installer in this repository targets Windows x64.</p>
             </details>
           </div>
@@ -424,7 +424,7 @@ scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"
           <h2>Changelog</h2>
           <h3>0.3.0</h3>
           <ul class="bullets">
-            <li>New TailSQL gem/database logo, Windows app icon, README artwork, and website branding.</li>
+            <li>New HySQL gem/database logo, Windows app icon, README artwork, and website branding.</li>
             <li>Add a built-in MCP server with six database tools, resources, Bearer auth, and a stdio bridge for AI coding agents.</li>
             <li>Add the Connect to AI view with Windsurf, Cursor, Claude, and generated-agent-prompt snippets.</li>
             <li>Add the Auto-REST gateway with CRUD, views, filters, pagination, CORS, API keys, OpenAPI 3.0, and Tailnet/Funnel exposure.</li>
@@ -466,8 +466,8 @@ scripts/build-installer.ps1 -Makensis "C:\Program Files (x86)\NSIS\makensis.exe"
   <footer class="site-footer">
     <div class="container">
       <div class="footer-bottom">
-        <span>&copy; <span data-year>2026</span> TailSQL contributors.</span>
-        <span class="legal">Tailscale is a trademark of Tailscale Inc. TailSQL is an independent project and is not affiliated with Tailscale Inc.</span>
+        <span>&copy; <span data-year>2026</span> HySQL contributors.</span>
+        <span class="legal">Tailscale is a trademark of Tailscale Inc. HySQL is an independent project and is not affiliated with Tailscale Inc.</span>
       </div>
     </div>
   </footer>

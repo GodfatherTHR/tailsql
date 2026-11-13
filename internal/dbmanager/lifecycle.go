@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/executil"
-	"tailsql/internal/jdbc"
+	"hysql/internal/config"
+	"hysql/internal/executil"
+	"hysql/internal/jdbc"
 )
 
 const (
@@ -126,7 +126,7 @@ func (m *Manager) runServer(instance config.Instance, java JavaInfo, h2 H2Info) 
 		return fmt.Errorf("open server log: %w", err)
 	}
 	timestamp := time.Now().UTC().Format(time.RFC3339)
-	_, _ = fmt.Fprintf(logFile, "\n===== TailSQL start %s =====\nport: %d\ndatabase: %s\nbaseDir: %s\n",
+	_, _ = fmt.Fprintf(logFile, "\n===== HySQL start %s =====\nport: %d\ndatabase: %s\nbaseDir: %s\n",
 		timestamp, instance.Port, instance.DatabaseFile, m.dbDir)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -295,7 +295,7 @@ func (m *Manager) failStart(id string, java JavaInfo, h2 H2Info, cause error) {
 }
 
 // Stop shuts down an instance, first asking H2 to close cleanly, then falling
-// back to force termination for processes TailSQL owns.
+// back to force termination for processes HySQL owns.
 func (m *Manager) Stop(id string) (config.Instance, error) {
 	m.mu.Lock()
 	instance, ok := m.store.Get(id)
@@ -359,7 +359,7 @@ func (m *Manager) Stop(id string) (config.Instance, error) {
 				_ = waitProcessExit(pid, 2*time.Second)
 			}
 		} else if details.Alive {
-			stopErrors = append(stopErrors, fmt.Sprintf("process %d is still running but could not be verified as TailSQL's H2 server; not terminating it", pid))
+			stopErrors = append(stopErrors, fmt.Sprintf("process %d is still running but could not be verified as HySQL's H2 server; not terminating it", pid))
 		}
 	}
 
@@ -500,7 +500,7 @@ func (m *Manager) StopAll(ctx context.Context) {
 }
 
 // Reconcile detects whether persisted PIDs from a previous session still belong
-// to TailSQL's H2 servers. Valid processes are adopted; stale ones are cleaned
+// to HySQL's H2 servers. Valid processes are adopted; stale ones are cleaned
 // up without touching unrelated Java processes.
 func (m *Manager) Reconcile(ctx context.Context) {
 	java, h2 := m.Java(), m.H2()
@@ -518,7 +518,7 @@ func (m *Manager) Reconcile(ctx context.Context) {
 					// The PID is a Java process on the expected port; adopt it.
 					adopt = true
 				case verified && !listening:
-					// Verified as TailSQL's H2 server but not serving: clean it up.
+					// Verified as HySQL's H2 server but not serving: clean it up.
 					if stored.ServerPassword != "" {
 						_ = m.shutdownServer(java, h2, stored)
 						_ = waitProcessExit(stored.PID, 4*time.Second)

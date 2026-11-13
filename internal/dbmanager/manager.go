@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"tailsql/internal/config"
-	"tailsql/internal/jdbc"
+	"hysql/internal/config"
+	"hysql/internal/jdbc"
 )
 
 // Config wires the manager to the state store and filesystem locations.
@@ -98,7 +98,7 @@ func New(cfg Config) (*Manager, error) {
 	return manager, nil
 }
 
-// DataDir exposes the root of TailSQL's application data.
+// DataDir exposes the root of HySQL's application data.
 func (m *Manager) DataDir() string { return m.dataDir }
 
 // RefreshHealth re-runs Java and H2 discovery.

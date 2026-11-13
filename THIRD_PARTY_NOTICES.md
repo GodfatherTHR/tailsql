@@ -1,6 +1,6 @@
 # Third-party notices
 
-TailSQL is built with and distributes the following third-party components.
+HySQL is built with and distributes the following third-party components.
 
 ## H2 Database Engine
 
@@ -33,7 +33,7 @@ The H2 jar is bundled in `assets/h2.jar` and in the Windows installer.
 
 ## Tailscale
 
-- Optional external dependency. Tailscale is not bundled with TailSQL.
+- Optional external dependency. Tailscale is not bundled with HySQL.
 - License: BSD 3-Clause
 - Project: https://github.com/tailscale/tailscale
 
@@ -45,8 +45,8 @@ The H2 jar is bundled in `assets/h2.jar` and in the Windows installer.
 
 ## WebView2
 
-- Windows runtime component provided by Microsoft. It is not bundled by TailSQL.
+- Windows runtime component provided by Microsoft. It is not bundled by HySQL.
 
 ## Trademarks
 
-Tailscale is a trademark of Tailscale Inc. TailSQL is an independent project and is not affiliated with Tailscale Inc.
+Tailscale is a trademark of Tailscale Inc. HySQL is an independent project and is not affiliated with Tailscale Inc.

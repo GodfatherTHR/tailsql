@@ -48,11 +48,11 @@ export function Sidebar({
     <aside className="flex h-full w-[290px] flex-none flex-col border-r border-white/[0.06] bg-ink-900/55">
       <div className="flex h-[76px] items-center gap-3 border-b border-white/[0.06] px-5">
         <div className="flex h-10 w-10 flex-none overflow-hidden rounded-xl border border-mint-400/20 shadow-[0_0_24px_-8px_rgba(52,211,153,0.5)]">
-          <img src={logoMark} alt="TailSQL" className="h-full w-full object-cover" />
+          <img src={logoMark} alt="HySQL" className="h-full w-full object-cover" />
         </div>
         <div className="min-w-0">
           <div className="flex items-baseline gap-2">
-            <span className="text-[15px] font-semibold tracking-tight text-slate-100">TailSQL</span>
+            <span className="text-[15px] font-semibold tracking-tight text-slate-100">HySQL</span>
             <span className="text-[10px] font-medium text-slate-600">
               v{health?.appVersion ?? '0.1.0'}
             </span>
@@ -159,7 +159,7 @@ export function Sidebar({
           </div>
         </div>
         <p className="mt-3 px-1 text-[10px] leading-relaxed text-slate-700">
-          Data is stored in <span className="font-mono text-slate-600">~/.tailsql</span>
+          Data is stored in <span className="font-mono text-slate-600">~/.hysql</span>
         </p>
       </div>
     </aside>
